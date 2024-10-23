@@ -1,0 +1,29 @@
+# Django-specific
+.idea/
+.vscode/
+venv/
+*.pyc
+__pycache__/
+db.sqlite3
+
+# General VCS
+.git
+.svn
+.hg
+
+# Common build artifacts
+*.egg-info/
+dist/
+build/
+docs/_build/
+
+# Local configuration
+local.py
+env.py
+secrets.yml
+
+# IPython notebook
+.ipynb_checkpoints
+
+# macOS
+.DS_Store
