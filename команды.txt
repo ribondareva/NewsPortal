@@ -1,0 +1,41 @@
+>>> user1 = User.objects.create_user('user1', 'user1@example.com', 'password123')
+>>> user2 = User.objects.create_user('user2', 'user2@example.com', 'password123')
+>>> author1 = Author.objects.create(authorUser=user1)
+>>> author2 = Author.objects.create(authorUser=user2)
+>>> category1 = Category.objects.create(name='Политика')
+>>> category2 = Category.objects.create(name='Спорт')
+>>> category3 = Category.objects.create(name='Технологии')
+>>> category4 = Category.objects.create(name='Развлечения')
+>>> post1 = Post.objects.create(author=author1, title='Статья 1', text='Текст статьи 1', categoryType='AR')  
+>>> post2 = Post.objects.create(author=author2, title='Статья 2', text='Текст статьи 2', categoryType='AR')  
+>>> post3 = Post.objects.create(author=author1, title='Новость 1', text='Текст новости 1', categoryType='NW')  
+>>> post1.postCategory.add(category1, category2)  
+>>> post2.postCategory.add(category3)  
+>>> post3.postCategory.add(category4)  
+>>> comment1 = Comment.objects.create(commentPost=post1, commentUser=user2, text='Комментарий к статье 1')
+>>> comment2 = Comment.objects.create(commentPost=post2, commentUser=user1, text='Комментарий к статье 2') 
+>>> comment3 = Comment.objects.create(commentPost=post3,commentUser=user2, text='Комментарий к новости')
+>>> comment4 = Comment.objects.create(commentPost=post1, commentUser=user1, text='Еще один комментарий к статье 1')
+>>> post1.like()
+>>> post1.like()
+>>> post1.dislike()
+>>> post2.like()
+>>> post2.dislike()
+>>> comment1.like()
+>>> comment2.dislike()
+>>> author1.update_rating()
+>>> author2.update_rating()
+>>> best_author = Author.objects.order_by('-ratingAuthor').first()
+>>> best_author
+>>> best_author.ratingAuthor
+>>> best_author.authorUser.username
+>>> best_post = Post.objects.order_by('-rating').first()
+>>> best_post
+>>> best_post.title
+>>> best_post.creationDate
+>>> best_post.rating
+>>> best_post.author.authorUser.username
+>>> best_post.preview()
+>>> comments = best_post.comment_set.all()
+>>> for comment in comments:
+...     print(f"Дата: {comment.creationDate}, Пользователь: {comment.commentUser.username}, Рейтинг: {comment.rating}, Текст: {comment.text}")
