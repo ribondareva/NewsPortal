@@ -1,20 +1,51 @@
-
-from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.shortcuts import redirect, render
 from django.views.generic import (
-    ListView, DetailView, CreateView
+    ListView, DetailView, CreateView, UpdateView, DeleteView,
 )
 
-from django import forms
+
 from .forms import PostForm
 from .filters import PostFilter
 from .models import Post
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login, logout, authenticate
 
-from datetime import datetime
+
+
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            return redirect('/')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'login.html', {'form': form})
+
+def register_view(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+
+            login(request, user)
+            return redirect('/')
+    else:
+        form = UserCreationForm()
+    return render(request, 'register.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('/')
 
 class PostsList(ListView):
     model = Post
     ordering = '-creationDate'
-    template_name = 'news.html'
     context_object_name = 'posts'
     paginate_by = 10
 
@@ -28,22 +59,10 @@ class PostsList(ListView):
         context['filterset'] = self.filterset
         return context
 
-
-class FilterList(ListView):
-    model = Post
-    ordering = '-creationDate'
-    template_name = 'search.html'
-    context_object_name = 'posts'
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        self.filterset = PostFilter(self.request.GET, queryset)
-        return self.filterset.qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['filterset'] = self.filterset
-        return context
+    def get_template_names(self):
+        if self.request.path == '/post/search/':
+            return 'search.html'
+        return 'news.html'
 
 
 
@@ -53,28 +72,27 @@ class PostDetail(DetailView):
     context_object_name = 'post'
 
 
-class NewCreate(CreateView):
+class PostCreate(CreateView):
     model = Post
     form_class = PostForm
-    template_name = 'new_edit.html'
+    template_name = 'post_edit.html'
 
     def form_valid(self, form):
-        instance = form.save(commit=False)
-        instance.categoryType = 'NW'  # Устанавливаем тип "новость"
-        # instance.author = self.request.user
-        instance.save()
-        return redirect('post.html', pk=instance.pk)  # Перенаправляем на страницу с деталями новости
+        post = form.save(commit=False)
+        if self.request.path == '/post/articles/create/':
+            post.categoryType = 'AR'
+        post.author = self.request.user
+        post.save()
+        return redirect('post_detail', pk=post.pk)  # Перенаправляем на страницу с деталями новости
 
-
-
-
-class ArticleCreate(CreateView):
-    model = Post
+class PostEdit(UpdateView):
     form_class = PostForm
-    template_name = 'article_edit.html'
+    model = Post
+    template_name = 'post_edit.html'
 
-    def form_valid(self, form):
-        instance = form.save(commit=False)
-        instance.categoryType = 'AR'  # Устанавливаем тип "статья"
-        instance.save()
-        return redirect('post', pk=instance.pk)  # Перенаправляем на страницу с деталями новости
+class PostDelete(DeleteView):
+    model = Post
+    template_name = 'post_delete.html'
+    success_url = reverse_lazy('post_list')
+
+

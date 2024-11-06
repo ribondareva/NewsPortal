@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('pages/', include('django.contrib.flatpages.urls')),
-   # Делаем так, чтобы все адреса из нашего приложения (news/urls.py)
-   # подключались к главному приложению с префиксом news/.
-    path('news/', include('news.urls')),
+    path('post/', include('news.urls')),
+
 ]
