@@ -1,0 +1,20 @@
+{% extends 'flatpages/default.html' %}
+
+{% block content %}
+  <h1>Результаты поиска</h1>
+
+  <form method="get">
+    {{ form.as_p }}
+    <button type="submit">Искать</button>
+  </form>
+
+  {% if object_list %}
+    <ul>
+      {% for post in object_list %}
+        <li><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Ничего не найдено.</p>
+  {% endif %}
+{% endblock %}

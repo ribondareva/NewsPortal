@@ -3,20 +3,23 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.urls import reverse
+from django.utils import timezone
 
-class Author(models.Model):
-    authorUser = models.OneToOneField(User, on_delete=models.CASCADE)
-    ratingAuthor = models.SmallIntegerField(default=0)
 
-    def update_rating(self):
-        postRat = self.post_set.aggregate(postRating=Sum('rating'))
-        pRat = postRat.get('postRating',0)
-
-        commentRat = self.authorUser.comment_set.aggregate(commentRating=Sum('rating'))
-        cRat = commentRat.get('commentRating',0)
-
-        self.ratingAuthor = pRat  * 3 + cRat
-        self.save()
+# class Author(models.Model):
+#     authorUser = models.OneToOneField(User, on_delete=models.CASCADE)
+#     ratingAuthor = models.SmallIntegerField(default=0)
+#
+#     def update_rating(self):
+#         postRat = self.post_set.aggregate(postRating=Sum('rating'))
+#         pRat = postRat.get('postRating',0)
+#
+#         commentRat = self.authorUser.comment_set.aggregate(commentRating=Sum('rating'))
+#         cRat = commentRat.get('commentRating',0)
+#
+#         self.ratingAuthor = pRat  * 3 + cRat
+#         self.save()
 
 
 class Category(models.Model):
@@ -24,7 +27,7 @@ class Category(models.Model):
 
 
 class Post(models.Model):
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    # author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     NEWS = 'NW'
     ARTICLE = 'AR'
@@ -32,7 +35,7 @@ class Post(models.Model):
         (NEWS, 'News'),
         (ARTICLE, 'Article'),
     )
-    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=ARTICLE)
+    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=NEWS)
     creationDate = models.DateTimeField(auto_now_add=True)
     postCategory = models.ManyToManyField(Category, through='PostCategory')
     title = models.CharField(max_length=64)
@@ -49,6 +52,9 @@ class Post(models.Model):
 
     def preview(self):
         return self.text[0:119] + '...'
+
+    def get_absolute_url(self):
+        return reverse('new_detail', args=[str(self.id)])
 
 
 class PostCategory(models.Model):
@@ -75,10 +81,14 @@ class Comment(models.Model):
 class New(models.Model):
     title = models.CharField(max_length=200)
     text = models.TextField()
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.title} {self.pub_date.strftime('%d.%m.%Y')} {self.text}"
+
+    def get_absolute_url(self):
+        return reverse('new_detail', args=[str(self.id)])
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

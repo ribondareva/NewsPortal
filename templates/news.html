@@ -3,27 +3,27 @@
 {% load custom_filters %}
 
 {% block title %}
-Products
+News
 {% endblock title %}
 
 {% block content %}
    <h1>Все новости</h1>
    <hr>
-   <h3>Всего новостей: {{ news|length }}</h3>
+   <h3>Всего новостей: {{ posts|length }}</h3>
 
-   {% if news %}
+   {% if posts %}
        <table>
            <tr>
                <td>Заголовок</td>
                <td>Дата публикации</td>
-               <td>Текст статьи</td>
+               <td>Текст</td>
            </tr>
 
-           {% for new in news %}
+           {% for post in posts %}
            <tr>
-               <td>{{ new.title|censor }}</td>
-               <td>{{ new.pub_date|date:'d.m.Y'  }}</td>
-               <td>{{ new.text|truncatewords:20|censor }}</td>
+               <td>{{ post.title|censor }}</td>
+               <td>{{ post.creationDate|date:'d.m.Y'  }}</td>
+               <td>{{ post.text|truncatewords:20|censor }}</td>
            </tr>
            {% endfor %}
 
@@ -31,4 +31,25 @@ Products
    {% else %}
        <h2>Новостей нет!</h2>
    {% endif %}
+
+{# Добавляем пагинацию на страницу #}
+
+   {% if page_obj.has_previous %}
+       <a href="?page=1">1</a>
+       {% if page_obj.previous_page_number != 1 %}
+           ...
+           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+       {% endif %}
+   {% endif %}
+
+   {{ page_obj.number }}
+
+   {% if page_obj.has_next %}
+       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+       {% if paginator.num_pages != page_obj.next_page_number %}
+           ...
+           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+       {% endif %}
+   {% endif %}
+
 {% endblock content %}
