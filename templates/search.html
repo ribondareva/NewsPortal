@@ -3,18 +3,31 @@
 {% block content %}
   <h1>Результаты поиска</h1>
 
-  <form method="get">
-    {{ form.as_p }}
-    <button type="submit">Искать</button>
+   <form action="" method="get">
+    {{ filterset.form.as_p }}
+    <input type="submit" value="Найти" />
   </form>
 
-  {% if object_list %}
-    <ul>
-      {% for post in object_list %}
-        <li><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>Ничего не найдено.</p>
-  {% endif %}
+
+
+ {% if posts %}
+       <table>
+           <tr>
+               <td>Заголовок</td>
+               <td>Дата публикации</td>
+               <td>Текст</td>
+           </tr>
+
+           {% for post in posts %}
+           <tr>
+               <td>{{ post.title}}</td>
+               <td>{{ post.creationDate|date:'d.m.Y' }}</td>
+               <td>{{ post.text }}</td>
+           </tr>
+           {% endfor %}
+
+       </table>
+   {% else %}
+       <h2>Новостей нет!</h2>
+   {% endif %}
 {% endblock %}

@@ -7,19 +7,19 @@ from django.urls import reverse
 from django.utils import timezone
 
 
-# class Author(models.Model):
-#     authorUser = models.OneToOneField(User, on_delete=models.CASCADE)
-#     ratingAuthor = models.SmallIntegerField(default=0)
-#
-#     def update_rating(self):
-#         postRat = self.post_set.aggregate(postRating=Sum('rating'))
-#         pRat = postRat.get('postRating',0)
-#
-#         commentRat = self.authorUser.comment_set.aggregate(commentRating=Sum('rating'))
-#         cRat = commentRat.get('commentRating',0)
-#
-#         self.ratingAuthor = pRat  * 3 + cRat
-#         self.save()
+class Author(models.Model):
+    authorUser = models.OneToOneField(User, on_delete=models.CASCADE)
+    ratingAuthor = models.SmallIntegerField(default=0)
+
+    def update_rating(self):
+        postRat = self.post_set.aggregate(postRating=Sum('rating'))
+        pRat = postRat.get('postRating',0)
+
+        commentRat = self.authorUser.comment_set.aggregate(commentRating=Sum('rating'))
+        cRat = commentRat.get('commentRating',0)
+
+        self.ratingAuthor = pRat  * 3 + cRat
+        self.save()
 
 
 class Category(models.Model):
@@ -27,7 +27,7 @@ class Category(models.Model):
 
 
 class Post(models.Model):
-    # author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     NEWS = 'NW'
     ARTICLE = 'AR'
