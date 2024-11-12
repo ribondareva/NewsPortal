@@ -4,12 +4,10 @@ from .models import Post, Category
 
 
 class PostForm(forms.ModelForm):
-    text = forms.CharField(min_length=20)
-    author = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = Post
-        fields = ['title', 'text']
+        fields = ['author', 'title', 'postCategory', 'text']
 
 
     def clean(self):

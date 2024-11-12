@@ -11,12 +11,21 @@ News
    <hr>
    <h3>Всего постов: {{ posts|length }}</h3>
 
+    {% if perms.news.create_post %}
+    <a href="{% url 'create_post' %}">Добавить пост</a>
+    {% endif %}
+
+
    {% if posts %}
        <table>
            <tr>
                <td>Заголовок</td>
                <td>Дата публикации</td>
                <td>Текст</td>
+
+               {% if perms.news.post_update or perms.news.post_delete %}
+                <td>Действия</td>
+                {% endif %}
            </tr>
 
            {% for post in posts %}
@@ -24,12 +33,22 @@ News
                <td>{{ post.title|censor }}</td>
                <td>{{ post.creationDate|date:'d.m.Y'  }}</td>
                <td>{{ post.text|truncatewords:20|censor }}</td>
+
+               <td>
+                    {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
+                    {% if perms.news.post_update %}
+                    <a href="{% url 'post_update' pk=post.id %}">Изменить</a>
+                    {% endif %}
+                    {% if perms.news.delete_product %}
+                    <a href="{% url 'post_delete' post.id %}">Удалить</a>
+                    {% endif %}
+               </td>
            </tr>
            {% endfor %}
 
        </table>
    {% else %}
-       <h2>Новостей нет!</h2>
+       <h2>Постов нет!</h2>
    {% endif %}
 
 {# Добавляем пагинацию на страницу #}

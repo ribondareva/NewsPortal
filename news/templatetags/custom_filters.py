@@ -7,6 +7,7 @@ register = template.Library()
 censored_words = ['редиска', 'картошка']
 pattern = r'\b(?:' + '|'.join(censored_words) + r')\b'
 
+
 @register.filter()
 def censor(value):
     """
