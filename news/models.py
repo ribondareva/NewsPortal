@@ -101,3 +101,16 @@ class New(models.Model):
         context = super().get_context_data(**kwargs)
         context['pub_date'] = datetime.utcnow()
         return context
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )
+    category = models.ForeignKey(
+        to='Category',
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )

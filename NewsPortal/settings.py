@@ -42,12 +42,13 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
     'django_filters',
-    'news',
+    'news.apps.NewsConfig',
 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.yandex',
+
 ]
 
 SITE_ID = 1
@@ -161,3 +162,26 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
 
+
+SITE_URL = 'http://127.0.0.1:8000'
+
+
+# Настройки почты
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = "koteikakoteevn"
+EMAIL_HOST_PASSWORD = "eyenojadndzjbrrk"
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+
+DEFAULT_FROM_EMAIL = "koteikakoteevn@yandex.ru"
+
+
+EMAIL_SUBJECT_PREFIX = '⏲️'
+
+
+SERVER_EMAIL = "koteikakoteevn@yandex.ru"
+MANAGERS = (
+    ('Maria', 'mnikitina2001@gmail.com'),
+)
