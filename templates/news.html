@@ -10,7 +10,27 @@ News
    <h1>Все посты</h1>
    <hr>
    <h3>Всего постов: {{ posts|length }}</h3>
+   <style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-left: 0;
+        margin-top: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
 
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
     {% if perms.news.create_post %}
     <a href="{% url 'create_post' %}">Добавить пост</a>
     {% endif %}
@@ -21,6 +41,7 @@ News
            <tr>
                <td>Заголовок</td>
                <td>Дата публикации</td>
+               <td>Категория</td>
                <td>Текст</td>
 
                {% if perms.news.post_update or perms.news.post_delete %}
@@ -32,6 +53,9 @@ News
            <tr>
                <td>{{ post.title|censor }}</td>
                <td>{{ post.creationDate|date:'d.m.Y'  }}</td>
+               <td>{% for category in post.category.all %}
+                        <a href="{% url 'category_list' category.id %}">{{ category }}</a>
+                    {% endfor %}</td>
                <td>{{ post.text|truncatewords:20|censor }}</td>
 
                <td>

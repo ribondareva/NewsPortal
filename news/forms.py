@@ -7,7 +7,7 @@ class PostForm(forms.ModelForm):
 
     class Meta:
         model = Post
-        fields = ['author', 'title', 'postCategory', 'text']
+        fields = ['author', 'title', 'category', 'text']
 
 
     def clean(self):
