@@ -20,6 +20,9 @@ from django.views.decorators.csrf import csrf_protect
 from .models import Subscription, Category
 
 
+from .tasks import notify_about_new_post
+
+
 class PostsList(ListView):
     model = Post
     ordering = '-creationDate'
@@ -60,6 +63,8 @@ class PostCreate(PermissionRequiredMixin, CreateView):
         if self.request.path == '/post/articles/create/':
             post.categoryType = 'AR'
         post.save()
+        # Запускаем Celery задачу для уведомления подписчиков
+        notify_about_new_post.delay(post_id=post.pk)
         return super().form_valid(form)
 
 class PostEdit(PermissionRequiredMixin, UpdateView):

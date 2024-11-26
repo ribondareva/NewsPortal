@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.flatpages',
     'django_filters',
-    'django_apscheduler',
+    # 'django_apscheduler',
     'news.apps.NewsConfig',
 
     'allauth',
@@ -186,3 +186,10 @@ SERVER_EMAIL = "koteikakoteevn@yandex.ru"
 MANAGERS = (
     ('Maria', 'mnikitina2001@gmail.com'),
 )
+
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
