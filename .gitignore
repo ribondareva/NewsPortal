@@ -4,8 +4,11 @@
 venv/
 *.pyc
 __pycache__/
+cache_files
 db.sqlite3
-
+errors.log
+general.log
+security.log
 # General VCS
 .git
 .svn

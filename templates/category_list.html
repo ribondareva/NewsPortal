@@ -1,24 +1,38 @@
 {% extends 'flatpages/default.html' %}
 
 {% load custom_filters %}
+{% load cache %}
 
+{% cache 100 number %}
 {% block title %}
 News
 {% endblock title %}
+{% endcache %}
 
 {% block content %}
+   {% cache 100 number1 %}
    <style>
     /* Выравниваем весь контент по левому краю */
     body {
         text-align: left;
     }
    </style>
-   <h1>Все посты</h1>
-   <hr>
-   <h3>Всего постов: {{ category_news_list|length }}</h3>
-   {% if is_not_subscriber %}
-       <p class="text-left"><a href="{% url 'subscribe' category.id %}" class="btn btn-secondary btn-sm">Подписаться</a></p>
-   {% endif %}
+
+   <h3>Всего постов в категории {{ category.name }}: {{ category_news_list|length }}</h3>
+   {% endcache %}
+
+    {% if is_not_subscriber %}
+         <form method="post" action="{% url 'subscribe' category.id %}">
+             {% csrf_token %}
+             <button type="submit">Подписаться</button>
+        </form>
+    {% else %}
+        <form method="post" action="{% url 'subscribe' category.id %}">
+            {% csrf_token %}
+            <button type="submit">Отписаться</button>
+        </form>
+    {% endif %}
+
    <hr>
 
    <ul class="list-group list-group-flush">

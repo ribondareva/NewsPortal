@@ -1,4 +1,5 @@
-# import datetime
+# from datetime import datetime, timedelta
+# import pytz
 # import logging
 #
 # from apscheduler.schedulers.blocking import BlockingScheduler
@@ -17,8 +18,10 @@
 #
 #
 # def my_job():
-#     today = datetime.datetime.now()
-#     last_week = today - datetime.timedelta(days=7)
+#     # Явное указание часового пояса сервера (например, UTC)
+#     tz = pytz.timezone('UTC')
+#     today = datetime.now(tz)  # Текущее время с учетом часового пояса
+#     last_week = today - timedelta(days=7)
 #     posts = Post.objects.filter(creationDate__gte=last_week)
 #     categories = set(posts.values_list('category__name', flat=True))
 #     subscribers = set(Category.objects.filter(name__in=categories).values_list('subscribers__email', flat=True))
