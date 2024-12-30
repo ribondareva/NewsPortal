@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 import logging
 from pathlib import Path
-
+from django.core.mail import mail_admins
 from django.views import static
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure--i9okz0&im1f%u=a*1lk=&_(zr9(b7f90k!kn=$fjvuxph%hjk"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "8000"]
 
 
 # Application definition
@@ -57,6 +57,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -70,6 +71,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "NewsPortal.urls"
+
+LOCALE_PATH = [os.path.join(BASE_DIR, "locale")]
 
 TEMPLATES = [
     {
@@ -169,7 +172,7 @@ SITE_URL = "http://127.0.0.1:8000"
 
 
 # Настройки почты
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.yandex.ru"
 EMAIL_PORT = 465
 EMAIL_HOST_USER = "koteikakoteevn"
@@ -178,7 +181,7 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
 DEFAULT_FROM_EMAIL = "koteikakoteevn@yandex.ru"
-
+ADMINS = [("Marie", "marinik2001@mail.ru"), ("Maria", "mnikitina2001@gmail.com")]
 
 EMAIL_SUBJECT_PREFIX = "⏲️"
 

@@ -9,8 +9,13 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
+
 from django.views.generic import (
-    ListView, DetailView, CreateView, UpdateView, DeleteView,
+    ListView,
+    DetailView,
+    CreateView,
+    UpdateView,
+    DeleteView,
 )
 
 
@@ -31,8 +36,8 @@ from .tasks import notify_about_new_post
 
 class PostsList(ListView):
     model = Post
-    ordering = '-creationDate'
-    context_object_name = 'posts'
+    ordering = "-creationDate"
+    context_object_name = "posts"
     paginate_by = 10
 
     def get_queryset(self):
@@ -42,20 +47,19 @@ class PostsList(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['filterset'] = self.filterset
+        context["filterset"] = self.filterset
         return context
 
     def get_template_names(self):
-        if self.request.path == '/post/search/':
-            return 'search.html'
-        return 'news.html'
-
+        if self.request.path == "/post/search/":
+            return "search.html"
+        return "news.html"
 
 
 class PostDetail(DetailView):
     model = Post
-    template_name = 'post.html'
-    context_object_name = 'post'
+    template_name = "post.html"
+    context_object_name = "post"
     queryset = Post.objects.all()
 
     def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта
@@ -67,17 +71,19 @@ class PostDetail(DetailView):
 
 
 logger = logging.getLogger(__name__)  # Настраиваем логгер
+
+
 class PostCreate(PermissionRequiredMixin, CreateView):
-    permission_required = ('news.add_post',)
+    permission_required = ("news.add_post",)
     model = Post
     form_class = PostForm
-    template_name = 'post_edit.html'
+    template_name = "post_edit.html"
 
     def form_valid(self, form):
         try:
             post = form.save(commit=False)
-            if self.request.path == '/post/articles/create/':
-                post.categoryType = 'AR'
+            if self.request.path == "/post/articles/create/":
+                post.categoryType = "AR"
             if not post.author:
                 raise ValueError("У поста должен быть автор")
             post.save()
@@ -88,45 +94,46 @@ class PostCreate(PermissionRequiredMixin, CreateView):
             raise
         return super().form_valid(form)
 
+
 class PostEdit(PermissionRequiredMixin, UpdateView):
-    permission_required = ('news.change_post',)
+    permission_required = ("news.change_post",)
     model = Post
     form_class = PostForm
-    template_name = 'post_edit.html'
+    template_name = "post_edit.html"
+
 
 class PostDelete(PermissionRequiredMixin, DeleteView):
-    permission_required = ('news.delete_post',)
+    permission_required = ("news.delete_post",)
     model = Post
-    template_name = 'post_delete.html'
-    success_url = reverse_lazy('post_list')
+    template_name = "post_delete.html"
+    success_url = reverse_lazy("post_list")
 
 
 class CategoryListView(ListView):
     model = Category
-    template_name = 'category_list.html'
-    context_object_name = 'category_news_list'
+    template_name = "category_list.html"
+    context_object_name = "category_news_list"
 
     def get_queryset(self):
-        self.category = get_object_or_404(Category, id=self.kwargs['pk'])
-        queryset = Post.objects.filter(category=self.category).order_by('-creationDate')
+        self.category = get_object_or_404(Category, id=self.kwargs["pk"])
+        queryset = Post.objects.filter(category=self.category).order_by("-creationDate")
         # Аннотируем категории, чтобы передать состояние подписки
         return queryset.annotate(
             user_subscribed=Exists(
                 Subscription.objects.filter(
-                    user=self.request.user, # Текущий пользователь
-                    category=OuterRef('pk'), # Сравнение по категории
+                    user=self.request.user,  # Текущий пользователь
+                    category=OuterRef("pk"),  # Сравнение по категории
                 )
             )
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['is_not_subscriber'] = not self.get_queryset().filter(
-            user_subscribed=True
-        ).exists()
-        context['category'] = self.category
+        context["is_not_subscriber"] = (
+            not self.get_queryset().filter(user_subscribed=True).exists()
+        )
+        context["category"] = self.category
         return context
-
 
 
 @login_required
@@ -136,25 +143,25 @@ def subscribe(request, pk):
     category = Category.objects.get(id=pk)
     category.subscribers.add(user)
 
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'subscribe':
+    if request.method == "POST":
+        action = request.POST.get("action")
+        if action == "subscribe":
             Subscription.objects.get_or_create(user=user, category=category)
-        elif action == 'unsubscribe':
+        elif action == "unsubscribe":
             Subscription.objects.filter(user=user, category=category).delete()
 
-    return redirect('subscriptions')# Перенаправление на страницу подписок
+    return redirect("subscriptions")  # Перенаправление на страницу подписок
 
 
 def subscriptions(request):
-    if request.method == 'POST':
-        category_id = request.POST.get('category_id')
+    if request.method == "POST":
+        category_id = request.POST.get("category_id")
         category = Category.objects.get(id=category_id)
-        action = request.POST.get('action')
+        action = request.POST.get("action")
 
-        if action == 'subscribe':
+        if action == "subscribe":
             Subscription.objects.create(user=request.user, category=category)
-        elif action == 'unsubscribe':
+        elif action == "unsubscribe":
             Subscription.objects.filter(
                 user=request.user,
                 category=category,
@@ -164,12 +171,12 @@ def subscriptions(request):
         user_subscribed=Exists(
             Subscription.objects.filter(
                 user=request.user,
-                category=OuterRef('pk'),
+                category=OuterRef("pk"),
             )
         )
-    ).order_by('name')
+    ).order_by("name")
     return render(
         request,
-        'subscriptions.html',
-        {'categories': categories_with_subscriptions},
+        "subscriptions.html",
+        {"categories": categories_with_subscriptions},
     )
