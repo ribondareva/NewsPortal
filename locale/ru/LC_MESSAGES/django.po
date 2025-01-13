@@ -24,9 +24,13 @@ msgstr ""
 msgid "category name"
 msgstr "Имя категории"
 
-#: .\templates\flatpages\default.html:35
-msgid "Home"
-msgstr "На главную"
+#: .\templates\flatpages\home.html:22
+msgid "To all posts"
+msgstr "Ко всем постам"
+
+#: .\templates\flatpages\news.html:40
+msgid "To home page"
+msgstr "Перейти на домашнюю страничку"
 
 #: .\templates\flatpages\default.html:35
 msgid "Create new"
@@ -79,3 +83,7 @@ msgstr "Изменить"
 #: .\templates\news.html:71
 msgid "Delete"
 msgstr "Удалить"
+
+#: .\templates\home.html:13
+msgid "Welcome to the news portal"
+msgstr "Приветствуем Вас в нашем новостном портале"

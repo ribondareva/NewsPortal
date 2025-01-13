@@ -21,6 +21,7 @@ from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
 
+from news import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -35,6 +36,7 @@ urlpatterns = [
     path(
         "i18n/", include("django.conf.urls.i18n")
     ),  # подключаем встроенные эндопинты для работы с локализацией
+    path("", views.HomePage.as_view(), name="home"),
     path("accounts/", include("allauth.urls")),
     path("pages/", include("django.contrib.flatpages.urls")),
     path("post/", include("news.urls")),

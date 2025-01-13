@@ -1,6 +1,5 @@
 import logging
 
-
 from django.core.cache import cache
 
 
@@ -9,12 +8,15 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 
 import pytz  # Импортируем модуль для работы с часовыми поясами
 from django.utils import timezone
+from django.utils.timezone import localtime, now
 
 
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
+from django.utils.timezone import activate
 
 from django.views.generic import (
+    TemplateView,
     ListView,
     DetailView,
     CreateView,
@@ -204,3 +206,25 @@ def subscriptions(request):
         "subscriptions.html",
         {"categories": categories_with_subscriptions},
     )
+
+
+class HomePage(TemplateView, TimezoneMixin):
+    template_name = "home.html"  # Укажите имя вашего шаблона
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Получаем часовой пояс из сессии или используем часовой пояс по умолчанию
+        user_timezone = self.request.session.get("django_timezone", "UTC")
+        activate(user_timezone)
+        context["timezones"] = pytz.common_timezones
+        context["current_time"] = localtime(now())  # Текущее время
+        context["user_timezone"] = user_timezone  # Текущий часовой пояс пользователя
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Обрабатываем выбор часового пояса."""
+        timezone_name = request.POST.get("timezone", None)
+        if timezone_name in pytz.common_timezones:
+            request.session["django_timezone"] = timezone_name
+            activate(timezone_name)
+        return redirect(self.request.path)

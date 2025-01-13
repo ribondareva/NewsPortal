@@ -1,0 +1,33 @@
+{% extends 'flatpages/default.html' %}
+
+{% load i18n %}
+{% load tz %}
+
+{% load custom_filters %}
+
+{% block title %}
+{% load static %}
+{% trans "Homepage" %}
+
+{% endblock title %}
+
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+ <style>
+     body {background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} #20B2AA {% else %} powderblue {% endif %};}
+ </style>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+           <div class="container">
+               <a class="navbar-brand" href="{% url 'post_list' %}">{% trans "To all posts" %}</a>
+               <button class="navbar-toggler" type="button" data-toggle="collapse"
+                       data-target="#navbarResponsive"
+                       aria-controls="navbarResponsive" aria-expanded="false"
+                       aria-label="Toggle navigation">
+                   <span class="navbar-toggler-icon"></span>
+               </button>
+           </div>
+        </nav>
+<h1><i>{% trans "Welcome to the news portal" %}!</i></h1>
+<img src="https://i.pinimg.com/originals/26/91/f2/2691f2fa1a0f078f5f274edf7fea6763.png" width="800" height="700">
+{% endblock content %}
