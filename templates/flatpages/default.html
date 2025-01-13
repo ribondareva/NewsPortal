@@ -1,22 +1,54 @@
 <!DOCTYPE html>
+{% load i18n %}
+{% load tz %}
+{% load static %}
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <meta name="description" content="" />
-        <meta name="author" content="" />
-        <title>Bare - Start Bootstrap Template</title>
-        <!-- Favicon-->
-        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
-        <!-- Core theme CSS (includes Bootstrap)-->
-        {% load static %}
-        <link href="{% static 'css/styles.css'%}" rel="stylesheet" />
+        <!-- Подключение CSS -->
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+         <!-- Если сейчас больше чем 19 или же меньше 7, то выводим тёмную тему, иначе выводим светлую -->
+        <style>
+            body {background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} #20B2AA {% else %} powderblue {% endif %};}
+        </style>
+
     </head>
     <body>
+    <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} <!-- Не забываем по csrf_token для POST запросов -->
+        <input type="hidden" name="next" value="{{ redirect_to }}">
+        {% get_current_language as LANGUAGE_CODE %}
+        <select name="language" id="">
+            {% get_available_languages as LANGUAGES %} <!-- получаем языки -->
+            {% get_language_info_list for LANGUAGES as languages %} <!-- Помещаем их в список languages -->
+            {% get_current_language as LANGUAGE_CODE %}
+            {% for language in languages %} <!-- Итерируясь по списку, выводим их название на языке пользователя и код -->
+                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %}>
+                    {{ language.name_local }} - {{ language.code }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Set">
+    </form>
+     {% get_current_timezone as TIME_ZONE %}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <label for="timezone">Time zone:</label>
+        <select name="timezone" id="timezone">
+            {% for tz in timezones %}
+                  <option value="{{ tz }}"{% if tz == TIME_ZONE %} selected{% endif %}>{{ tz }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Set">
+    </form>
+
+    {{ TIME_ZONE }}
+    {{ current_time|timezone:TIME_ZONE }} <!-- Отображаем время в выбранном часовом поясе  -->
         <!-- Responsive navbar-->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
            <div class="container">
-               <a class="navbar-brand" href="{% url 'post_list' %}">News Portal</a>
+               <a class="navbar-brand" href="{% url 'post_list' %}">{% trans "Home" %}</a>
                <button class="navbar-toggler" type="button" data-toggle="collapse"
                        data-target="#navbarResponsive"
                        aria-controls="navbarResponsive" aria-expanded="false"
@@ -26,10 +58,10 @@
                <div class="collapse navbar-collapse" id="navbarResponsive">
                    <ul class="navbar-nav ml-auto">
                        <li class="nav-item">
-                           <a class="nav-link" href="/post/news/create/">Создать новость</a>
+                           <a class="nav-link" href="/post/news/create/">{% trans "Create new" %}</a>
                        </li>
                         <li class="nav-item">
-                           <a class="nav-link" href="/post/articles/create/">Создать статью</a>
+                           <a class="nav-link" href="/post/articles/create/">{% trans "Create article" %}</a>
                        </li>
                    </ul>
                </div>

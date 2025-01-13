@@ -17,10 +17,27 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import TemplateView
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path(
+        "swagger-ui/",
+        TemplateView.as_view(
+            template_name="swagger-ui.html",
+            extra_context={"schema_url": "openapi-schema"},
+        ),
+        name="swagger-ui",
+    ),
+    path(
+        "i18n/", include("django.conf.urls.i18n")
+    ),  # подключаем встроенные эндопинты для работы с локализацией
     path("accounts/", include("allauth.urls")),
     path("pages/", include("django.contrib.flatpages.urls")),
     path("post/", include("news.urls")),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

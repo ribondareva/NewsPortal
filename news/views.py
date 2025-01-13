@@ -7,6 +7,10 @@ from django.core.cache import cache
 from django.contrib.auth.mixins import PermissionRequiredMixin
 
 
+import pytz  # Импортируем модуль для работы с часовыми поясами
+from django.utils import timezone
+
+
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 
@@ -34,7 +38,18 @@ from .models import Subscription, Category
 from .tasks import notify_about_new_post
 
 
-class PostsList(ListView):
+class TimezoneMixin:
+    """Миксин для работы с часовыми поясами."""
+
+    def get_timezones_context(self):
+        """Добавляет часовые пояса в контекст."""
+        return {
+            "current_time": timezone.localtime(timezone.now()),
+            "timezones": pytz.common_timezones,
+        }
+
+
+class PostsList(ListView, TimezoneMixin):
     model = Post
     ordering = "-creationDate"
     context_object_name = "posts"
@@ -48,7 +63,16 @@ class PostsList(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["filterset"] = self.filterset
+        # Добавляем часовые пояса в контекст
+        context.update(self.get_timezones_context())
         return context
+
+    def post(self, request, *args, **kwargs):
+        """Обрабатываем выбор часового пояса."""
+        timezone_name = request.POST.get("timezone", None)
+        if timezone_name in pytz.common_timezones:
+            request.session["django_timezone"] = timezone_name
+        return redirect(self.request.path)
 
     def get_template_names(self):
         if self.request.path == "/post/search/":

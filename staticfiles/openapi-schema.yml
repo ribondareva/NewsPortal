@@ -1,0 +1,157 @@
+openapi: 3.0.2
+info:
+  title: 'Some application'
+  version: "0.1"
+paths:
+  /posts/:
+    get:
+      summary: Get a list of posts
+      description: Retrieve a list of posts with optional filters.
+      tags:
+        - news
+      responses:
+        '200':
+          description: A list of posts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+    post:
+      summary: Create a new post
+      description: Create a new post in the system.
+      tags:
+        - news
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCreate'
+      responses:
+        '201':
+          description: Post created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /posts/{id}/:
+    get:
+      summary: Get a single post
+      description: Retrieve the details of a specific post by ID.
+      tags:
+        - news
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Details of the post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+    put:
+      summary: Update a post
+      description: Update an existing post by ID.
+      tags:
+        - news
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUpdate'
+      responses:
+        '200':
+          description: Post updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+    delete:
+      summary: Delete a post
+      description: Delete a post by ID.
+      tags:
+        - news
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Post deleted successfully.
+
+components:
+  schemas:
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 64
+        content:
+          type: string
+        author:
+          type: string
+        category:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+      required:
+        - title
+        - content
+        - author
+        - category
+
+    PostCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 64
+        content:
+          type: string
+        author:
+          type: string
+        category:
+          type: string
+      required:
+        - title
+        - content
+        - author
+        - category
+
+    PostUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 64
+        content:
+          type: string
+        category:
+          type: string
+      required:
+        - title
+        - content

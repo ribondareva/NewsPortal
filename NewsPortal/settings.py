@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "8000"]
 # Application definition
 
 INSTALLED_APPS = [
+    "modeltranslation",  # обязательно впишите его перед админом
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.yandex",
+    "rest_framework",
 ]
 
 SITE_ID = 1
@@ -65,6 +67,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "basic.middlewares.TimezoneMiddleware",
     # 'django.middleware.cache.UpdateCacheMiddleware',
     # 'django.middleware.common.CommonMiddleware',
     # 'django.middleware.cache.FetchFromCacheMiddleware',
@@ -72,7 +75,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "NewsPortal.urls"
 
-LOCALE_PATH = [os.path.join(BASE_DIR, "locale")]
+LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
 
 TEMPLATES = [
     {
@@ -126,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = "ru"
+LANGUAGES = [("en-us", "English"), ("ru", "Русский")]
 
 TIME_ZONE = "UTC"
 
@@ -147,7 +150,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 LOGIN_REDIRECT_URL = "/post"
 

@@ -1,15 +1,19 @@
 {% extends 'flatpages/default.html' %}
 
+{% load i18n %}
+
 {% load custom_filters %}
 
 {% block title %}
-News
+{% trans "News" %}
 {% endblock title %}
 
+
+
 {% block content %}
-   <h1>Все посты</h1>
+   <h1>{% trans "All posts" %}</h1>
    <hr>
-   <h3>Всего постов: {{ posts|length }}</h3>
+   <h3>{% trans "Posts count:" %} {{ posts|length }}</h3>
    <style>
     table {
         width: 100%;
@@ -32,20 +36,20 @@ News
     }
 </style>
     {% if perms.news.create_post %}
-    <a href="{% url 'create_post' %}">Добавить пост</a>
+    <a href="{% url 'create_post' %}">{% trans "Add post" %}</a>
     {% endif %}
 
 
    {% if posts %}
        <table>
            <tr>
-               <td>Заголовок</td>
-               <td>Дата публикации</td>
-               <td>Категория</td>
-               <td>Текст</td>
+               <td>{% trans "Title" %}</td>
+               <td>{% trans "Publication date" %}</td>
+               <td>{% trans "Category" %}</td>
+               <td>{% trans "Text" %}</td>
 
                {% if perms.news.post_update or perms.news.post_delete %}
-                <td>Действия</td>
+                <td>{% trans "Actions" %}</td>
                 {% endif %}
            </tr>
 
@@ -61,10 +65,10 @@ News
                <td>
                     {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
                     {% if perms.news.post_update %}
-                    <a href="{% url 'post_update' pk=post.id %}">Изменить</a>
+                    <a href="{% url 'post_update' pk=post.id %}">{% trans "Change" %}</a>
                     {% endif %}
                     {% if perms.news.delete_product %}
-                    <a href="{% url 'post_delete' post.id %}">Удалить</a>
+                    <a href="{% url 'post_delete' post.id %}">{% trans "Delete" %}</a>
                     {% endif %}
                </td>
            </tr>
