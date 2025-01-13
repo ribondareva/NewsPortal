@@ -11,7 +11,32 @@
         <link rel="stylesheet" href="{% static 'css/styles.css' %}">
          <!-- Если сейчас больше чем 19 или же меньше 7, то выводим тёмную тему, иначе выводим светлую -->
         <style>
-            body {background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} #20B2AA {% else %} powderblue {% endif %};}
+            body {
+            margin: 0;
+            padding: 0;
+            background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} #20B2AA {% else %} powderblue {% endif %};
+        }
+
+        header form {
+            width: 100vw;
+            padding: 10px 0;
+            display: flex;
+            position: fixed; top: 0; left: 0;
+        }
+       h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+       table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+       table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
         </style>
 
     </head>

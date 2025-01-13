@@ -25,6 +25,8 @@ from news import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("accounts/", include("allauth.urls")),
+    path("post/", include("news.urls")),
     path(
         "swagger-ui/",
         TemplateView.as_view(
@@ -37,9 +39,7 @@ urlpatterns = [
         "i18n/", include("django.conf.urls.i18n")
     ),  # подключаем встроенные эндопинты для работы с локализацией
     path("", views.HomePage.as_view(), name="home"),
-    path("accounts/", include("allauth.urls")),
     path("pages/", include("django.contrib.flatpages.urls")),
-    path("post/", include("news.urls")),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

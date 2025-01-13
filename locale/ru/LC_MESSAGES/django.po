@@ -28,6 +28,16 @@ msgstr "Имя категории"
 msgid "To all posts"
 msgstr "Ко всем постам"
 
+#: .\templates\flatpages\home.html:40
+msgid "Register"
+msgstr "Зарегистрироваться"
+
+
+#: .\templates\flatpages\news.html:25
+msgid "Exit"
+msgstr "Выход"
+
+
 #: .\templates\flatpages\news.html:40
 msgid "To home page"
 msgstr "Перейти на домашнюю страничку"

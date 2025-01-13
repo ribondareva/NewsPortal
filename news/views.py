@@ -60,7 +60,11 @@ class PostsList(ListView, TimezoneMixin):
     def get_queryset(self):
         queryset = super().get_queryset()
         self.filterset = PostFilter(self.request.GET, queryset)
-        return self.filterset.qs
+        if self.request.path.startswith("/news/"):
+            queryset = self.filterset.qs.filter(categoryType="NW")
+        elif self.request.path.startswith("/articles/"):
+            queryset = self.filterset.qs.filter(categoryType="AR")
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -109,6 +113,10 @@ class PostCreate(PermissionRequiredMixin, CreateView):
         try:
             post = form.save(commit=False)
             if self.request.path == "/post/articles/create/":
+                post.categoryType = "AR"
+            if self.request.path.startswith("/post/news/"):
+                post.categoryType = "NW"
+            elif self.request.path.startswith("/post/articles/"):
                 post.categoryType = "AR"
             if not post.author:
                 raise ValueError("У поста должен быть автор")

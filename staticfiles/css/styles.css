@@ -93,6 +93,8 @@
 
 body {
   margin: 0;
+  padding: 0; /* Убирает отступы у body */
+  box-sizing: border-box;
   font-family: var(--bs-body-font-family);
   font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
@@ -3751,7 +3753,9 @@ textarea.form-control-lg {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  padding: var(--bs-navbar-padding-y) var(--bs-navbar-padding-x);
+  width: 100vw;
+  margin: 0;
+  padding: v10px 0;
 }
 .navbar > .container,
 .navbar > .container-fluid,
