@@ -42,12 +42,12 @@ A Django-based news portal where users can stay updated with the latest articles
 ## Installation
 
 ### 1. Clone the Repository
-git clone https://github.com/ribondareva/NewsPortal.git
-cd NewsPortal
+- git clone https://github.com/ribondareva/NewsPortal.git
+- cd NewsPortal
 
 ### 2. Set Up Virtual Environment
-python -m venv venv
-source venv/bin/activate 
+- python -m venv venv
+- source venv/bin/activate 
 
 ### 3. Set Up the Database
 python manage.py migrate
@@ -59,7 +59,7 @@ python manage.py migrate
  python manage.py runserver
 
 
-**Usage**
+## Usage
 
  ### For Authors
 Register and request author permissions from an admin.
