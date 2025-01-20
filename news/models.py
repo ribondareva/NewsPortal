@@ -38,18 +38,6 @@ class Category(models.Model):
         return self.name
 
 
-# class MyModel(models.Model):
-#     name = models.CharField(max_length=100)
-#     kind = models.ForeignKey(
-#         Category,
-#         on_delete=models.CASCADE,
-#         related_name="kinds",
-#         verbose_name=pgettext_lazy(
-#             "help text for MyModel model", "This is the help text"
-#         ),
-#     )
-
-
 class Post(models.Model):
 
     author = models.ForeignKey(Author, on_delete=models.CASCADE)

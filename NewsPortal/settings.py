@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django_filters",
     # 'django_apscheduler',
     "news.apps.NewsConfig",
+    "user_profile",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -152,7 +153,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-LOGIN_REDIRECT_URL = "/post"
+LOGIN_REDIRECT_URL = "profile"
 
 
 AUTHENTICATION_BACKENDS = [

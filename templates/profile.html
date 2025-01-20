@@ -1,0 +1,18 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+    Профиль пользователя
+{% endblock title %}
+
+{% block content %}
+    <div style="text-align: center; margin-top: 20px">
+        <h3>Страница профиля пользователя {{user}}</h3>
+
+        {% if is_not_author %}
+        <a href="{% url 'be_author' %}" class="btn btn-sn btn-secondary">Хочу стать автором!</a>
+        {% endif %}
+        <a href="{% url 'post_list' %}" class="btn btn-sn btn-secondary">Ко всем постам</a>
+        <a href="{% url 'home' %}" class="btn btn-sn btn-secondary">На главную</a>
+    </div>
+
+{% endblock content %}

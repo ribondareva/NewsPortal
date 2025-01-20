@@ -40,7 +40,7 @@ msgstr "Выход"
 
 #: .\templates\flatpages\news.html:40
 msgid "To home page"
-msgstr "Перейти на домашнюю страничку"
+msgstr "Перейти на главную"
 
 #: .\templates\flatpages\default.html:35
 msgid "Create new"
