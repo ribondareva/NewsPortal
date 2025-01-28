@@ -79,6 +79,11 @@ class Post(models.Model):
             f"product-{self.pk}"
         )  # затем удаляем его из кэша, чтобы сбросить его
 
+    class Meta:
+        permissions = [
+            ("can_add_comment", "Can add comment"),
+        ]
+
 
 class PostCategory(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
@@ -99,6 +104,15 @@ class Comment(models.Model):
     def dislike(self):
         self.rating -= 1
         self.save()
+
+    def __str__(self):
+        return f"Комментарий от {self.commentUser} к {self.commentPost}"
+
+    class Meta:
+        permissions = [
+            ("can_add_comment", "Can add comment"),
+            ("can_delete_comment", "Can delete comment"),
+        ]
 
 
 class New(models.Model):
