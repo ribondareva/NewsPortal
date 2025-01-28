@@ -15,6 +15,8 @@ import logging
 from pathlib import Path
 from django.core.mail import mail_admins
 from django.views import static
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure--i9okz0&im1f%u=a*1lk=&_(zr9(b7f90k!kn=$fjvuxph%hjk"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "8000"]
 
@@ -172,33 +174,31 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
 
 
-SITE_URL = "http://127.0.0.1:8000"
-
+# Основные настройки
+SITE_URL = config("SITE_URL")
 
 # Настройки почты
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.yandex.ru"
-EMAIL_PORT = 465
-EMAIL_HOST_USER = "koteikakoteevn"
-EMAIL_HOST_PASSWORD = "eyenojadndzjbrrk"
-EMAIL_USE_TLS = False
-EMAIL_USE_SSL = True
-
-DEFAULT_FROM_EMAIL = "koteikakoteevn@yandex.ru"
-ADMINS = [("Marie", "marinik2001@mail.ru"), ("Maria", "mnikitina2001@gmail.com")]
-
+EMAIL_BACKEND = config("EMAIL_BACKEND")
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT", cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", cast=bool)
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL")
+SERVER_EMAIL = config("SERVER_EMAIL")
 EMAIL_SUBJECT_PREFIX = "⏲️"
 
+# Администраторы
+ADMINS = eval(config("ADMINS"))  # eval для преобразования строки в список кортежей
+MANAGERS = eval(config("MANAGERS"))
 
-SERVER_EMAIL = "koteikakoteevn@yandex.ru"
-MANAGERS = (("Maria", "mnikitina2001@gmail.com"),)
-
-
-CELERY_BROKER_URL = "redis://localhost:6379"
-CELERY_RESULT_BACKEND = "redis://localhost:6379"
-CELERY_ACCEPT_CONTENT = ["application/json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
+# Celery настройки
+CELERY_BROKER_URL = config("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = config("CELERY_RESULT_BACKEND")
+CELERY_ACCEPT_CONTENT = [config("CELERY_ACCEPT_CONTENT")]
+CELERY_TASK_SERIALIZER = config("CELERY_TASK_SERIALIZER")
+CELERY_RESULT_SERIALIZER = config("CELERY_RESULT_SERIALIZER")
 
 
 # CACHES = {
