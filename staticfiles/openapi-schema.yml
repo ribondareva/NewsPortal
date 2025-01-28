@@ -1,9 +1,9 @@
 openapi: 3.0.2
 info:
-  title: 'Some application'
+  title: ''
   version: "0.1"
 paths:
-  /posts/:
+  /post/:
     get:
       summary: Get a list of posts
       description: Retrieve a list of posts with optional filters.
@@ -37,7 +37,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Post'
 
-  /posts/{id}/:
+  /post/{id}/:
     get:
       summary: Get a single post
       description: Retrieve the details of a specific post by ID.
@@ -120,7 +120,7 @@ components:
           format: date-time
       required:
         - title
-        - content
+        - text
         - author
         - category
 
@@ -138,7 +138,7 @@ components:
           type: string
       required:
         - title
-        - content
+        - text
         - author
         - category
 
@@ -154,4 +154,4 @@ components:
           type: string
       required:
         - title
-        - content
+        - text
