@@ -3,8 +3,7 @@ import logging
 from django.core.cache import cache
 
 
-from django.contrib.auth.mixins import PermissionRequiredMixin
-
+from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
 
 import pytz  # Импортируем модуль для работы с часовыми поясами
 from django.utils import timezone
@@ -14,6 +13,7 @@ from django.utils.timezone import localtime, now
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.timezone import activate
+from django.views import View
 
 from django.views.generic import (
     TemplateView,
@@ -25,12 +25,12 @@ from django.views.generic import (
 )
 
 
-from .forms import PostForm
+from .forms import PostForm, CommentForm
 from .filters import PostFilter
 from .models import Post
 
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Exists, OuterRef
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_protect
@@ -98,6 +98,12 @@ class PostDetail(DetailView):
             obj = super().get_object(queryset=self.queryset)
             cache.set(f'product-{self.kwargs["pk"]}', obj)
         return obj
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Получаем комментарии, связанные с текущим постом
+        context["comments"] = self.object.comment_set.all()
+        return context
 
 
 logger = logging.getLogger(__name__)  # Настраиваем логгер
@@ -170,6 +176,29 @@ class CategoryListView(ListView):
         return context
 
 
+# Создание комментария
+class CreateCommentView(PermissionRequiredMixin, View):
+    permission_required = "news.can_add_comment"
+    raise_exception = True  # Поднимает исключение, если прав недостаточно
+    template_name = "create_comment.html"
+
+    def get(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        form = CommentForm()
+        return render(request, self.template_name, {"form": form, "post": post})
+
+    def post(self, request, pk, *args, **kwargs):
+        post = get_object_or_404(Post, pk=pk)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.commentUser = request.user
+            comment.commentPost = post
+            comment.save()
+            return redirect("post_detail", pk=pk)
+        return render(request, self.template_name, {"form": form, "post": post})
+
+
 @login_required
 @csrf_protect
 def subscribe(request, pk):
@@ -217,7 +246,7 @@ def subscriptions(request):
 
 
 class HomePage(TemplateView, TimezoneMixin):
-    template_name = "home.html"  # Укажите имя вашего шаблона
+    template_name = "home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
