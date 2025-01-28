@@ -7,4 +7,23 @@
 {% block content %}
 <h1>{{ post.title }}</h1>
 <p>{{ post.text }}</p>
+<hr>
+
+<h2>Комментарии:</h2>
+<ul>
+    {% for comment in comments %}
+        <li>
+            <strong>{{ comment.commentUser.username }}</strong>: {{ comment.text }}
+            <br>
+            <small>Добавлено: {{ comment.creationDate }}</small>
+        </li>
+    {% empty %}
+        <p>Комментариев пока нет.</p>
+    {% endfor %}
+</ul>
+<form action="{% url 'create_comment' post.pk %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Добавить комментарий</button>
+</form>
 {% endblock content %}
