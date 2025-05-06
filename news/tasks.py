@@ -1,32 +1,36 @@
 import logging
+from datetime import datetime
+from datetime import timedelta
 
 from celery import shared_task
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from datetime import datetime, timedelta
 
-from .models import Post, Category
+from .models import Category
+from .models import Post
 from NewsPortal import settings
+
 
 def send_notifications(preview, pk, title, subscribers):
     """
     Фоновая задача для отправки email-уведомлений о новом посте.
     """
     html_content = render_to_string(
-        'post_created_email.html',
+        "post_created_email.html",
         {
-            'text': preview,
-            'link': f'{settings.SITE_URL}/post/{pk}/',
-        }
+            "text": preview,
+            "link": f"{settings.SITE_URL}/post/{pk}/",
+        },
     )
     msg = EmailMultiAlternatives(
         subject=title,
-        body='',  # Пустое текстовое тело, так как основное содержимое в HTML
+        body="",  # Пустое текстовое тело, так как основное содержимое в HTML
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=subscribers,
     )
-    msg.attach_alternative(html_content, 'text/html')
+    msg.attach_alternative(html_content, "text/html")
     msg.send()
+
 
 @shared_task(bind=True)
 def notify_about_new_post(post_id):
@@ -62,6 +66,8 @@ def notify_about_new_post(post_id):
 
 
 logger = logging.getLogger(__name__)  # Настраиваем логгер
+
+
 @shared_task(bind=True)
 def send_weekly_digest(self):
     """
@@ -90,27 +96,24 @@ def send_weekly_digest(self):
 
             # Рендерим HTML для письма
             html_content = render_to_string(
-                'daily_post.html',
-                {'posts': posts, 'category': category, 'link':settings.SITE_URL,}
+                "daily_post.html",
+                {
+                    "posts": posts,
+                    "category": category,
+                    "link": settings.SITE_URL,
+                },
             )
 
             # Создаём и отправляем письмо
-            subject = f'Еженедельная подборка новостей: {category.name}'
+            subject = f"Еженедельная подборка новостей: {category.name}"
             msg = EmailMultiAlternatives(
                 subject=subject,
-                body='',
+                body="",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=recipient_list,
             )
-            msg.attach_alternative(html_content, 'text/html')
+            msg.attach_alternative(html_content, "text/html")
             msg.send()
         except Exception as e:
             # Логируем ошибку, чтобы не терять информацию
-            logger.error(
-                f"Ошибка при отправке писем для категории {category.name}: {e}",
-                exc_info=True
-            )
-
-
-
-
+            logger.error(f"Ошибка при отправке писем для категории {category.name}: {e}", exc_info=True)

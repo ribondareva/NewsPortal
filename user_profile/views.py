@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
+from django.shortcuts import render
 
 from news.models import Author
 

@@ -1,16 +1,14 @@
 from django.urls import path
 
-from .views import (
-    PostsList,
-    PostDetail,
-    PostCreate,
-    PostEdit,
-    PostDelete,
-    subscriptions,
-    CategoryListView,
-    subscribe,
-    CreateCommentView,
-)
+from .views import CategoryListView
+from .views import CreateCommentView
+from .views import PostCreate
+from .views import PostDelete
+from .views import PostDetail
+from .views import PostEdit
+from .views import PostsList
+from .views import subscribe
+from .views import subscriptions
 
 
 urlpatterns = [

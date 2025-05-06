@@ -1,42 +1,34 @@
 import logging
 
-from django.core.cache import cache
-
-
-from django.contrib.auth.mixins import PermissionRequiredMixin, LoginRequiredMixin
-
 import pytz  # Импортируем модуль для работы с часовыми поясами
-from django.utils import timezone
-from django.utils.timezone import localtime, now
-
-
-from django.urls import reverse_lazy
-from django.shortcuts import redirect, get_object_or_404
-from django.utils.timezone import activate
-from django.views import View
-
-from django.views.generic import (
-    TemplateView,
-    ListView,
-    DetailView,
-    CreateView,
-    UpdateView,
-    DeleteView,
-)
-
-
-from .forms import PostForm, CommentForm
-from .filters import PostFilter
-from .models import Post
-
-
-from django.contrib.auth.decorators import login_required, permission_required
-from django.db.models import Exists, OuterRef
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.core.cache import cache
+from django.db.models import Exists
+from django.db.models import OuterRef
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.shortcuts import render
+from django.urls import reverse_lazy
+from django.utils import timezone
+from django.utils.timezone import activate
+from django.utils.timezone import localtime
+from django.utils.timezone import now
+from django.views import View
 from django.views.decorators.csrf import csrf_protect
-from .models import Subscription, Category
+from django.views.generic import CreateView
+from django.views.generic import DeleteView
+from django.views.generic import DetailView
+from django.views.generic import ListView
+from django.views.generic import TemplateView
+from django.views.generic import UpdateView
 
-
+from .filters import PostFilter
+from .forms import CommentForm
+from .forms import PostForm
+from .models import Category
+from .models import Post
+from .models import Subscription
 from .tasks import notify_about_new_post
 
 
@@ -169,9 +161,7 @@ class CategoryListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["is_not_subscriber"] = (
-            not self.get_queryset().filter(user_subscribed=True).exists()
-        )
+        context["is_not_subscriber"] = not self.get_queryset().filter(user_subscribed=True).exists()
         context["category"] = self.category
         return context
 

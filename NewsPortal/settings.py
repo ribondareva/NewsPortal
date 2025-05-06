@@ -9,12 +9,9 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
 import os
-import logging
 from pathlib import Path
-from django.core.mail import mail_admins
-from django.views import static
+
 from decouple import config
 
 
@@ -111,7 +108,6 @@ DATABASES = {
 
 
 # Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -204,7 +200,9 @@ CELERY_RESULT_SERIALIZER = config("CELERY_RESULT_SERIALIZER")
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-#         'LOCATION': os.path.join(BASE_DIR, 'cache_files'), # Указываем, куда будем сохранять кэшируемые файлы! Не забываем создать папку cache_files внутри папки с manage.py!
+#         'LOCATION': os.path.join(BASE_DIR, 'cache_files'),
+# Указываем, куда будем сохранять кэшируемые файлы!
+# Не забываем создать папку cache_files внутри папки с manage.py!
 #         # 'TIMEOUT': 300,
 #     }
 # }

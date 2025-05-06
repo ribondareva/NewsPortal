@@ -1,6 +1,12 @@
 from django.contrib import admin
-from .models import New, Post, PostCategory, Author, Category, Comment
 from modeltranslation.admin import TranslationAdmin  # импортируем модель админки
+
+from .models import Author
+from .models import Category
+from .models import Comment
+from .models import New
+from .models import Post
+from .models import PostCategory
 
 
 # Регистрируем модели для перевода в админке

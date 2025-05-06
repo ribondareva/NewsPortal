@@ -1,5 +1,7 @@
 from django.urls import path
-from user_profile.views import profile, be_author
+
+from user_profile.views import be_author
+from user_profile.views import profile
 
 
 urlpatterns = [

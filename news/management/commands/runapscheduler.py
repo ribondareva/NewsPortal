@@ -24,7 +24,8 @@
 #     last_week = today - timedelta(days=7)
 #     posts = Post.objects.filter(creationDate__gte=last_week)
 #     categories = set(posts.values_list('category__name', flat=True))
-#     subscribers = set(Category.objects.filter(name__in=categories).values_list('subscribers__email', flat=True))
+#     subscribers = set(Category.objects.filter(name__in=categories).
+#     values_list('subscribers__email', flat=True))
 #     html_content = render_to_string(
 #         'daily_post.html',
 # {
@@ -62,7 +63,8 @@
 #             replace_existing=True,
 #         )
 #         logger.info("Added job 'my_job'.")
-#         # каждую неделю будут удаляться старые задачи, которые либо не удалось выполнить, либо уже выполнять не надо
+#         # каждую неделю будут удаляться старые задачи,
+#         # которые либо не удалось выполнить, либо уже выполнять не надо
 #         scheduler.add_job(
 #             delete_old_job_executions,
 #             trigger=CronTrigger(

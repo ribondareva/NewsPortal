@@ -1,9 +1,9 @@
+from allauth.account.forms import SignupForm
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import Group
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
-from allauth.account.forms import SignupForm
-from django.contrib.auth.models import Group
 
 
 class SignUpForm(UserCreationForm):

@@ -14,12 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-
-from django.contrib import admin
-from django.urls import path, include
-from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
+from django.urls import include
+from django.urls import path
+from django.views.generic import TemplateView
 
 from news import views
 
@@ -38,9 +38,8 @@ urlpatterns = [
         ),
         name="swagger-ui",
     ),
-    path(
-        "i18n/", include("django.conf.urls.i18n")
-    ),  # подключаем встроенные эндопинты для работы с локализацией
+    path("i18n/", include("django.conf.urls.i18n")),
+    # подключаем встроенные эндопинты для работы с локализацией
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

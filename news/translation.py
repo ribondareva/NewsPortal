@@ -1,8 +1,8 @@
-from .models import Category, Post, PostCategory
-from modeltranslation.translator import (
-    register,
-    TranslationOptions,
-)  # импортируем декоратор для перевода и класс настроек, от которого будем наследоваться
+from modeltranslation.translator import register
+from modeltranslation.translator import TranslationOptions
+
+from .models import Category
+from .models import Post
 
 
 # регистрируем наши модели для перевода

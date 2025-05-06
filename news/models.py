@@ -1,15 +1,17 @@
 from datetime import datetime
-from django.core.validators import MinValueValidator
-from django.utils.translation import gettext as _
-from django.utils.translation import (
-    pgettext_lazy,
-)  # импортируем «ленивый» геттекст с подсказкой
-from django.db import models
+
 from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.validators import MinValueValidator
+from django.db import models
 from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
-from django.core.cache import cache
+from django.utils.translation import gettext as _
+
+# from django.utils.translation import (
+#     pgettext_lazy,
+# )  # импортируем «ленивый» геттекст с подсказкой
 
 
 class Author(models.Model):
@@ -18,10 +20,10 @@ class Author(models.Model):
 
     def update_rating(self):
         postRat = self.post_set.aggregate(postRating=Sum("rating"))
-        pRat = postRat.get("postRating", 0)
+        pRat = postRat.get("postRating") or 0
 
         commentRat = self.authorUser.comment_set.aggregate(commentRating=Sum("rating"))
-        cRat = commentRat.get("commentRating", 0)
+        cRat = commentRat.get("commentRating") or 0
 
         self.ratingAuthor = pRat * 3 + cRat
         self.save()
@@ -48,9 +50,7 @@ class Post(models.Model):
         (NEWS, "News"),
         (ARTICLE, "Article"),
     )
-    categoryType = models.CharField(
-        max_length=2, choices=CATEGORY_CHOICES, default=NEWS
-    )
+    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=NEWS)
     creationDate = models.DateTimeField(auto_now_add=True)
     category = models.ManyToManyField(Category, through="PostCategory")
     title = models.CharField(max_length=64)
@@ -72,12 +72,8 @@ class Post(models.Model):
         return reverse("post_detail", args=[str(self.id)])
 
     def save(self, *args, **kwargs):
-        super().save(
-            *args, **kwargs
-        )  # сначала вызываем метод родителя, чтобы объект сохранился
-        cache.delete(
-            f"product-{self.pk}"
-        )  # затем удаляем его из кэша, чтобы сбросить его
+        super().save(*args, **kwargs)  # сначала вызываем метод родителя, чтобы объект сохранился
+        cache.delete(f"product-{self.pk}")  # затем удаляем его из кэша, чтобы сбросить его
 
     class Meta:
         permissions = [

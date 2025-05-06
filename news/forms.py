@@ -1,6 +1,9 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Post, Category, Comment
+
+from .models import Category
+from .models import Comment
+from .models import Post
 
 
 class PostForm(forms.ModelForm):
