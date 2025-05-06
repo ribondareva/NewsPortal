@@ -1,72 +1,107 @@
-# News Portal
+# Новостной портал
 
-A Django-based news portal where users can stay updated with the latest articles and news. The platform supports two main types of users: **regular users** and **authors**. Authors can create, edit, or delete posts (articles or news). Registered users can subscribe to specific categories to receive weekly email digests.
-
----
-
-## Features
-
-### General Features
-- **Responsive Design**: Accessible on both desktop and mobile devices.
-- **Category-Based Content**: News and articles are organized into categories.
-- **User Authentication**: Secure registration, login, and profile management.
-
-### Author Features
-- Create, edit, or delete posts.
-- Manage categories for their articles.
-- Dashboard to monitor their posts' performance.
-
-### Regular User Features
-- Subscribe to categories of interest.
-- Weekly email digest with articles from subscribed categories.
-- Comment on articles (optional feature).
-
-### Email Notifications
-- Automated weekly email digests.
-- Fully customizable email templates.
-- Integration with SMTP or third-party email services (e.g., SendGrid, Postmark).
+Этот проект представляет собой новостной портал, где пользователи могут просматривать новости, подписываться на категории, комментировать посты и становиться авторами. Платформа также предоставляет функции персонализации и интерактивности, такие как уведомления о новых постах и возможность изменять тему интерфейса в зависимости от времени суток.
 
 ---
 
-## Tech Stack
+## Функции
+### 1. **Регистрация и аутентификация пользователей**
+- Регистрация через e-mail.
+- Регистрация через Яндекс аккаунт.
+- Подтверждение e-mail через код для завершения регистрации.
+- Доступ к персонализированным функциям после регистрации.
+### 2. **Публикация и редактирование постов**
+- Пользователи могут стать авторами и публиковать свои посты.
+- Каждый пост включает:
+  - Заголовок: Краткое название поста.
+  - Контент: Текст с возможностью добавления изображений, встроенных видео.
+- Посты можно редактировать и удалять.
+### 3. **Категории и фильтрация новостей**
+- Новости могут быть отнесены к одной из категорий.
+- Пользователи могут подписываться на категории, чтобы получать уведомления о новых постах.
+- Возможность фильтрации постов по категории, названию и дате создания (закомментировано в коде).
+### 4. **Комментарии к постам**
+- Пользователи могут оставлять комментарии под постами.
+- Каждый комментарий связан с конкретным постом.
+### 5. **Пагинация и уведомления**
+- Внедрена пагинация для отображения новостей на нескольких страницах.
+- Пользователи получают уведомления о новых постах в любимых категориях.
+### 6. **Интернационализация и локализация**
+- Пользователь может выбрать часовой пояс, и на сайте будет отображаться текущее время в его часовом поясе.
+- В зависимости от времени суток тема интерфейса меняется с темной на светлую.
 
-### Backend
-- Python (Django Framework)
-- SQLite3 (Default Database)
+---
 
-### Frontend
-- HTML, CSS, JavaScript (with optional frameworks like Bootstrap)
+## Используемые технологии
+- **Backend**: Django (с использованием Celery для асинхронных задач, таких как отправка уведомлений).
+- **Frontend**: HTML/CSS, шаблоны Django.
+- **База данных**: База данных: SQLite.
+- **E-mail уведомления**: E-mail уведомления: SMTP для отправки писем.
+- **OAuth2 для аутентификации через Яндекс**: используем библиотеку для интеграции с Яндекс OAuth2.
+---
 
-### Additional Tools
-- Celery for scheduling weekly digests.
-## Installation
+## Инструкция по установке
 
-### 1. Clone the Repository
-`git clone https://github.com/ribondareva/NewsPortal.git`
- `cd NewsPortal`
+### 1. Клонирование репозитория
+```
+git clone https://github.com/ribondareva/NewsPortal.git
+cd newsportal
+```
+### 2. Установка зависимостей
+Убедитесь, что у вас установлен Python и pip, затем выполните:
+```
+pip install -r requirements.txt
+```
+### 3. Настройка окружения
+Создайте файл .env в корневой директории проекта со следующим содержимым:
+```
+# Основные настройки
+SITE_URL=http://127.0.0.1:8000
 
-### 2. Set Up Virtual Environment
-`python -m venv venv`
-`source venv/bin/activate` 
+# Настройки почты
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.yandex.ru
+EMAIL_PORT=465
+EMAIL_HOST_USER=<ваш_email>
+EMAIL_HOST_PASSWORD=<ваш_пароль_от_email>
+EMAIL_USE_TLS=False
+EMAIL_USE_SSL=True
+DEFAULT_FROM_EMAIL=<ваш_email>
+SERVER_EMAIL=<ваш_email>
 
-### 3. Set Up the Database
-`python manage.py migrate`
+# Администраторы
+ADMINS=[("Администратор", "<ваш_email>")]
+MANAGERS=[("Менеджер", "<ваш_email>")]
 
- ### 4. Collect Static Files
- `python manage.py collectstatic`
+# Celery настройки
+CELERY_BROKER_URL=redis://localhost:6379
+CELERY_RESULT_BACKEND=redis://localhost:6379
+CELERY_ACCEPT_CONTENT=application/json
+CELERY_TASK_SERIALIZER=json
+CELERY_RESULT_SERIALIZER=json
 
- ### 5. Run the Development Server
- `python manage.py runserver`
+# Настройки для OAuth2 Яндекс
+YANDEX_OAUTH_CLIENT_ID=<ваш_client_id>
+YANDEX_OAUTH_CLIENT_SECRET=<ваш_client_secret>
+YANDEX_OAUTH_REDIRECT_URI=http://127.0.0.1:8000/accounts/yandex/callback/
+```
+### 4. Применение миграций
+```
+python manage.py migrate
+```
+### 5. Запуск сервера разработки
+```
+python manage.py runserver
+```
+### 6. Запуск Celery Worker
+```
+celery -A config worker -l INFO --pool=solo
+```
+### 7. Запуск Celery Beat
+```
+celery -A config beat --loglevel=info
+```
+### 8. Доступ к приложению
 
-
-## Usage
-
- ### For Authors
-Register and request author permissions from an admin.
-Log in to access the author dashboard.
-Create, edit, or delete posts.
-
- ### For Regular Users
-Register and log in.
-Browse posts by category or search by keyword.
-Subscribe to categories to receive weekly email digests.
+Откройте http://127.0.0.1:8000 в браузере.
+Такой файл .env должен быть заполнен пользователем с его реальными данными для настройки почтовых сервисов и других параметров, а также для конфигурации Celery и OAuth2 для аутентификации через Яндекс.
