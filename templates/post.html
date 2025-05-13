@@ -9,7 +9,7 @@
 
 {% block content %}
 <h1>{{ post.title }}</h1>
-<p>{{ post.text }}</p>
+<p>{{ post.text|safe }}</p>
 <hr>
 
 <h2>Комментарии:</h2>

@@ -33,7 +33,7 @@ def send_notifications(preview, pk, title, subscribers):
 
 
 @shared_task(bind=True)
-def notify_about_new_post(post_id):
+def notify_about_new_post(self, post_id):
     """
     Задача для уведомления подписчиков о новом посте.
     Принимает ID поста, на основе которого отправляются уведомления.
@@ -45,7 +45,9 @@ def notify_about_new_post(post_id):
         subscribers = set()  # Используем множество, чтобы избежать дублирования
 
         for category in categories:
-            subscribers.update(category.subscribers.all())  # Добавляем подписчиков категории
+            subscribers.update(
+                category.subscribers.all()
+            )  # Добавляем подписчиков категории
 
         # Получаем email-адреса подписчиков
         subscriber_emails = [subscriber.email for subscriber in subscribers]
@@ -116,4 +118,7 @@ def send_weekly_digest(self):
             msg.send()
         except Exception as e:
             # Логируем ошибку, чтобы не терять информацию
-            logger.error(f"Ошибка при отправке писем для категории {category.name}: {e}", exc_info=True)
+            logger.error(
+                f"Ошибка при отправке писем для категории {category.name}: {e}",
+                exc_info=True,
+            )

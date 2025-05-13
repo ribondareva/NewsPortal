@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.yandex",
     "rest_framework",
+    "django_ckeditor_5",
 ]
 
 SITE_ID = 1
@@ -343,3 +344,56 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
 }
+
+
+#  настройки CKEDITOR5
+CKEDITOR_5_CONFIGS = {
+    "default": {
+        "toolbar": [
+            "heading",
+            "|",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "alignment",
+            "|",
+            "link",
+            "bulletedList",
+            "numberedList",
+            "|",
+            "blockQuote",
+            "insertTable",
+            "horizontalLine",
+            "|",
+            "mediaEmbed",
+            "imageUpload",
+            "videoUpload",
+            "undo",
+            "redo",
+        ],
+        "image": {
+            "styles": ["alignLeft", "alignCenter", "alignRight"],  # Стили изображения
+            "toolbar": [
+                "imageTextAlternative",
+                "|",
+                "imageStyle:alignLeft",
+                "imageStyle:alignCenter",
+                "imageStyle:alignRight",
+            ],
+        },
+        "height": 400,
+        "width": "100%",
+        "mediaEmbed": {
+            "previewsInData": True,  # Позволяет вставлять видео как медиаэлемент
+        },
+    }
+}
+
+CKEDITOR_UPLOAD_PATH = "uploads/"  # Папка для хранения загруженных файлов
+CKEDITOR_IMAGE_BACKEND = "pillow"
+CKEDITOR_5_CUSTOM_CSS = "ckeditor_custom/ckeditor.css"
+
+CKEDITOR_RESTRICT_BY_USER = True
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")

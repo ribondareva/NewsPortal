@@ -46,7 +46,7 @@ News
                         <a href="{% url 'category_list' category.id %}">{{ category }}</a>
                     {% endfor %}
                 </small>
-                <p>{{ post.text|truncatechars:210 }}</p>
+                <p>{{ post.text|truncatechars:210|safe}}</p>
            </li>
        {% endfor %}
    </ul>

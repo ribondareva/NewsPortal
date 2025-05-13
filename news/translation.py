@@ -17,5 +17,5 @@ class CategoryTranslationOptions(TranslationOptions):
 class PostTranslationOptions(TranslationOptions):
     fields = (
         "title",
-        "text",
+        # "text",
     )

@@ -22,7 +22,7 @@
            <tr>
                <td>{{ post.title}}</td>
                <td>{{ post.creationDate|date:'d.m.Y' }}</td>
-               <td>{{ post.text }}</td>
+               <td>{{ post.text|safe }}</td>
            </tr>
            {% endfor %}
 

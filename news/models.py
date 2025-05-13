@@ -8,6 +8,8 @@ from django.db.models import Sum
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django_ckeditor_5.fields import CKEditor5Field
+
 
 # from django.utils.translation import (
 #     pgettext_lazy,
@@ -50,11 +52,13 @@ class Post(models.Model):
         (NEWS, "News"),
         (ARTICLE, "Article"),
     )
-    categoryType = models.CharField(max_length=2, choices=CATEGORY_CHOICES, default=NEWS)
+    categoryType = models.CharField(
+        max_length=2, choices=CATEGORY_CHOICES, default=NEWS
+    )
     creationDate = models.DateTimeField(auto_now_add=True)
     category = models.ManyToManyField(Category, through="PostCategory")
     title = models.CharField(max_length=64)
-    text = models.TextField()
+    text = CKEditor5Field("Text", config_name="default")
     rating = models.SmallIntegerField(default=0)
 
     def like(self):
@@ -72,8 +76,12 @@ class Post(models.Model):
         return reverse("post_detail", args=[str(self.id)])
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)  # сначала вызываем метод родителя, чтобы объект сохранился
-        cache.delete(f"product-{self.pk}")  # затем удаляем его из кэша, чтобы сбросить его
+        super().save(
+            *args, **kwargs
+        )  # сначала вызываем метод родителя, чтобы объект сохранился
+        cache.delete(
+            f"product-{self.pk}"
+        )  # затем удаляем его из кэша, чтобы сбросить его
 
     class Meta:
         permissions = [

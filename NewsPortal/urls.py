@@ -40,6 +40,7 @@ urlpatterns = [
     ),
     path("i18n/", include("django.conf.urls.i18n")),
     # подключаем встроенные эндопинты для работы с локализацией
-]
+    path("ckeditor5/", include("django_ckeditor_5.urls")),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

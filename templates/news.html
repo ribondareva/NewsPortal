@@ -57,7 +57,7 @@
                             <a href="{% url 'category_list' category.id %}">{{ category }}</a>{% if not forloop.last %}, {% endif %}
                         {% endfor %}
                     </td>
-                    <td>{{ post.text|truncatewords:20|censor }}</td>
+                    <td>{{ post.text|truncatewords:20|censor|safe }}</td>
                     {% if perms.news.post_update or perms.news.post_delete %}
                         <td>
                             {% if perms.news.post_update %}

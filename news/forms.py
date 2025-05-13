@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django_ckeditor_5.widgets import CKEditor5Widget
 
 from .models import Category
 from .models import Comment
@@ -11,6 +12,9 @@ class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ["author", "title", "category", "text"]
+        widgets = {
+            "text": CKEditor5Widget(config_name="default"),
+        }
 
     def clean(self):
         cleaned_data = super().clean()
