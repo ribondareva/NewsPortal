@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.utils.timezone import activate
 from django.utils.timezone import localtime
 from django.utils.timezone import now
@@ -37,9 +36,12 @@ class TimezoneMixin:
 
     def get_timezones_context(self):
         """Добавляет часовые пояса в контекст."""
+        current_time = localtime(now())
+        user_timezone = self.request.session.get("django_timezone", "UTC")
         return {
-            "current_time": timezone.localtime(timezone.now()),
+            "current_time": current_time,
             "timezones": pytz.common_timezones,
+            "TIME_ZONE": user_timezone,
         }
 
 
@@ -95,13 +97,20 @@ class PostDetail(DetailView):
         context = super().get_context_data(**kwargs)
         # Получаем комментарии, связанные с текущим постом
         context["comments"] = self.object.comment_set.all()
+        # Часовой пояс из сессии
+        user_timezone = self.request.session.get("django_timezone", "UTC")
+        activate(user_timezone)
+
+        context["timezones"] = pytz.common_timezones
+        context["current_time"] = localtime(now())  # Локализованное время
+        context["TIME_ZONE"] = user_timezone  # для шаблона
         return context
 
 
 logger = logging.getLogger(__name__)  # Настраиваем логгер
 
 
-class PostCreate(PermissionRequiredMixin, CreateView):
+class PostCreate(PermissionRequiredMixin, TimezoneMixin, CreateView):
     permission_required = ("news.add_post",)
     model = Post
     form_class = PostForm
@@ -126,22 +135,37 @@ class PostCreate(PermissionRequiredMixin, CreateView):
             raise
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_timezones_context())
+        return context
 
-class PostEdit(PermissionRequiredMixin, UpdateView):
+
+class PostEdit(PermissionRequiredMixin, TimezoneMixin, UpdateView):
     permission_required = ("news.change_post",)
     model = Post
     form_class = PostForm
     template_name = "post_edit.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_timezones_context())
+        return context
 
-class PostDelete(PermissionRequiredMixin, DeleteView):
+
+class PostDelete(PermissionRequiredMixin, TimezoneMixin, DeleteView):
     permission_required = ("news.delete_post",)
     model = Post
     template_name = "post_delete.html"
     success_url = reverse_lazy("post_list")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_timezones_context())
+        return context
 
-class CategoryListView(ListView):
+
+class CategoryListView(TimezoneMixin, ListView):
     model = Category
     template_name = "category_list.html"
     context_object_name = "category_news_list"
@@ -161,8 +185,11 @@ class CategoryListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["is_not_subscriber"] = not self.get_queryset().filter(user_subscribed=True).exists()
+        context["is_not_subscriber"] = (
+            not self.get_queryset().filter(user_subscribed=True).exists()
+        )
         context["category"] = self.category
+        context.update(self.get_timezones_context())
         return context
 
 
@@ -240,12 +267,12 @@ class HomePage(TemplateView, TimezoneMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Получаем часовой пояс из сессии или используем часовой пояс по умолчанию
         user_timezone = self.request.session.get("django_timezone", "UTC")
         activate(user_timezone)
         context["timezones"] = pytz.common_timezones
-        context["current_time"] = localtime(now())  # Текущее время
-        context["user_timezone"] = user_timezone  # Текущий часовой пояс пользователя
+        context["current_time"] = localtime(now())
+        context["user_timezone"] = user_timezone
+        context["TIME_ZONE"] = user_timezone
         return context
 
     def post(self, request, *args, **kwargs):

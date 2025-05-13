@@ -17,19 +17,11 @@
  <style>
      body {background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} #20B2AA {% else %} powderblue {% endif %};}
  </style>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top" style="width: 100%;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'post_list' %}">{% trans "To all posts" %}</a>
-            <a class="navbar-brand" href="{% url 'account_login' %}">{% trans "Login" %}</a>
-            <a class="navbar-brand" href="{% url 'account_signup' %}">{% trans "Register" %}</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarResponsive"
-                    aria-controls="navbarResponsive" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
-</nav>
+<div class="container my-3 d-flex gap-2 justify-content-center">
+    <a class="btn btn-outline-secondary" href="{% url 'post_list' %}">{% trans "To all posts" %}</a>
+    <a class="btn btn-outline-success" href="{% url 'account_login' %}">{% trans "Login" %}</a>
+    <a class="btn btn-outline-primary" href="{% url 'account_signup' %}">{% trans "Register" %}</a>
+</div>
 
 <h1><i>{% trans "Welcome to the news portal" %}!</i></h1>
 <img src="https://i.pinimg.com/originals/26/91/f2/2691f2fa1a0f078f5f274edf7fea6763.png" width="800" height="700">

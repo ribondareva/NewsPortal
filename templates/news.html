@@ -1,115 +1,98 @@
 {% extends 'flatpages/default.html' %}
-
 {% load i18n %}
-
 {% load custom_filters %}
 
 {% block title %}
-{% trans "News" %}
+    {% trans "News" %}
 {% endblock title %}
 
-
-
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top" style="width: 100%;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'home' %}">{% trans "To home page" %}</a>
-            <a class="navbar-brand" href="{% url 'account_logout' %}" onclick="return confirm('Are you sure you want to log out?');">
-            {% trans "Exit" %}</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarResponsive"
-                    aria-controls="navbarResponsive" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-        </div>
-    </nav>
-   <h1>{% trans "All posts" %}</h1>
-   <hr>
-   <h3>{% trans "Posts count:" %} {{ posts|length }}</h3>
-   <style>
+<h1>{% trans "All posts" %}</h1>
+<hr>
+<h3>{% trans "Posts count:" %} {{ posts|length }}</h3>
+
+<style>
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-left: 0;
         margin-top: 20px;
         border: 1px solid #ccc;
         border-radius: 5px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-
     th, td {
         border: 1px solid #ddd;
         padding: 8px;
         text-align: left;
     }
-
     th {
         background-color: #f2f2f2;
     }
 </style>
-    {% if perms.news.create_post %}
-    <a href="{% url 'create_post' %}">{% trans "Add post" %}</a>
+
+{% if perms.news.create_post %}
+    <a href="{% url 'create_post' %}" class="btn btn-primary mb-3">{% trans "Add post" %}</a>
+{% endif %}
+
+{% if posts %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Publication date" %}</th>
+                <th>{% trans "Category" %}</th>
+                <th>{% trans "Text" %}</th>
+                {% if perms.news.post_update or perms.news.post_delete %}
+                    <th>{% trans "Actions" %}</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for post in posts %}
+                <tr>
+                    <td><a href="{% url 'post_detail' pk=post.id %}">{{ post.title|censor }}</a></td>
+                    <td>{{ post.creationDate|date:"d.m.Y" }}</td>
+                    <td>
+                        {% for category in post.category.all %}
+                            <a href="{% url 'category_list' category.id %}">{{ category }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ post.text|truncatewords:20|censor }}</td>
+                    {% if perms.news.post_update or perms.news.post_delete %}
+                        <td>
+                            {% if perms.news.post_update %}
+                                <a href="{% url 'post_update' pk=post.id %}" class="btn btn-sm btn-warning">{% trans "Change" %}</a>
+                            {% endif %}
+                            {% if perms.news.delete_product %}
+                                <a href="{% url 'post_delete' post.id %}" class="btn btn-sm btn-danger">{% trans "Delete" %}</a>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <h2>{% trans "No posts yet!" %}</h2>
+{% endif %}
+
+<div class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page=1">1</a>
+        {% if page_obj.previous_page_number != 1 %}
+            ...
+            <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
     {% endif %}
 
+    <span class="current">{{ page_obj.number }}</span>
 
-   {% if posts %}
-       <table>
-           <tr>
-               <td>{% trans "Title" %}</td>
-               <td>{% trans "Publication date" %}</td>
-               <td>{% trans "Category" %}</td>
-               <td>{% trans "Text" %}</td>
-
-               {% if perms.news.post_update or perms.news.post_delete %}
-                <td>{% trans "Actions" %}</td>
-                {% endif %}
-           </tr>
-
-           {% for post in posts %}
-           <tr>
-               <td><a href="{% url 'post_detail' pk=post.id %}">{{ post.title|censor }}</a></td>
-               <td>{{ post.creationDate|date:'d.m.Y'  }}</td>
-               <td>{% for category in post.category.all %}
-                        <a href="{% url 'category_list' category.id %}">{{ category }}</a>
-                    {% endfor %}</td>
-               <td>{{ post.text|truncatewords:20|censor }}</td>
-
-               <td>
-                    {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
-                    {% if perms.news.post_update %}
-                    <a href="{% url 'post_update' pk=post.id %}">{% trans "Change" %}</a>
-                    {% endif %}
-                    {% if perms.news.delete_product %}
-                    <a href="{% url 'post_delete' post.id %}">{% trans "Delete" %}</a>
-                    {% endif %}
-               </td>
-           </tr>
-           {% endfor %}
-
-       </table>
-   {% else %}
-       <h2>Постов нет!</h2>
-   {% endif %}
-
-{# Добавляем пагинацию на страницу #}
-
-   {% if page_obj.has_previous %}
-       <a href="?page=1">1</a>
-       {% if page_obj.previous_page_number != 1 %}
-           ...
-           <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
-       {% endif %}
-   {% endif %}
-
-   {{ page_obj.number }}
-
-   {% if page_obj.has_next %}
-       <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-       {% if paginator.num_pages != page_obj.next_page_number %}
-           ...
-           <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
-       {% endif %}
-   {% endif %}
-
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+        {% if paginator.num_pages != page_obj.next_page_number %}
+            ...
+            <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+        {% endif %}
+    {% endif %}
+</div>
 {% endblock content %}

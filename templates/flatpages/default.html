@@ -3,84 +3,99 @@
 {% load tz %}
 {% load static %}
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-        <!-- Подключение CSS -->
-        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-         <!-- Если сейчас больше чем 19 или же меньше 7, то выводим тёмную тему, иначе выводим светлую -->
-        <style>
-            body {
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <style>
+        body {
             margin: 0;
             padding: 0;
             background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} #20B2AA {% else %} powderblue {% endif %};
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background-color: #f8f9fa;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         header form {
-            width: 100vw;
-            padding: 10px 0;
+            margin: 5px 0;
             display: flex;
-            position: fixed; top: 0; left: 0;
+            align-items: center;
         }
-       h1 {
+
+        header select, header input[type="submit"] {
+            margin-left: 10px;
+            padding: 4px 8px;
+        }
+
+        h1 {
             text-align: center;
             margin-bottom: 20px;
         }
-       table {
+
+        table {
             width: 100%;
             border-collapse: collapse;
         }
-       table th, table td {
+
+        table th, table td {
             padding: 10px;
             border: 1px solid #ddd;
             text-align: center;
         }
+    </style>
+</head>
+<body>
+    <header>
+        <form action="{% url 'set_language' %}" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ redirect_to }}">
+            <label for="language">{% trans "Language:" %}</label>
+            <select name="language" id="language">
+                {% get_available_languages as LANGUAGES %}
+                {% get_language_info_list for LANGUAGES as languages %}
+                {% get_current_language as LANGUAGE_CODE %}
+                {% for language in languages %}
+                    <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %}>
+                        {{ language.name_local }}
+                    </option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="{% trans 'Set' %}">
+        </form>
 
-        </style>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <label for="timezone">{% trans "Time zone:" %}</label>
+            <select name="timezone" id="timezone">
+                {% for tz in timezones %}
+                    <option value="{{ tz }}"{% if tz == TIME_ZONE %} selected{% endif %}>{{ tz }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="{% trans 'Set' %}">
+        </form>
 
-    </head>
-    <body>
-    <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} <!-- Не забываем по csrf_token для POST запросов -->
-        <input type="hidden" name="next" value="{{ redirect_to }}">
-        {% get_current_language as LANGUAGE_CODE %}
-        <select name="language" id="">
-            {% get_available_languages as LANGUAGES %} <!-- получаем языки -->
-            {% get_language_info_list for LANGUAGES as languages %} <!-- Помещаем их в список languages -->
-            {% get_current_language as LANGUAGE_CODE %}
-            {% for language in languages %} <!-- Итерируясь по списку, выводим их название на языке пользователя и код -->
-                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %}>
-                    {{ language.name_local }} - {{ language.code }}
-                </option>
-            {% endfor %}
-        </select>
-        <input type="submit" value="Set">
-    </form>
-     {% get_current_timezone as TIME_ZONE %}
-    <form action="" method="POST">
-        {% csrf_token %}
-        <label for="timezone">Time zone:</label>
-        <select name="timezone" id="timezone">
-            {% for tz in timezones %}
-                  <option value="{{ tz }}"{% if tz == TIME_ZONE %} selected{% endif %}>{{ tz }}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" value="Set">
-    </form>
+        {{ current_time|timezone:TIME_ZONE|date:"d.m.Y H:i" }} <!-- Отображаем время в выбранном часовом поясе  -->
+    </header>
 
-    {{ TIME_ZONE }}
-    {{ current_time|timezone:TIME_ZONE }} <!-- Отображаем время в выбранном часовом поясе  -->
-        <!-- Responsive navbar-->
-
-        <!-- Page content-->
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    {% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                {% block content %}
                     {{ flatpage.content }}
-                    {% endblock content %}
-                </div>
+                {% endblock content %}
             </div>
         </div>
-    </body>
+    </div>
+</body>
 </html>

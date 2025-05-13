@@ -34,7 +34,7 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "8000"]
 # Application definition
 
 INSTALLED_APPS = [
-    "modeltranslation",  # обязательно впишите его перед админом
+    "modeltranslation",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
