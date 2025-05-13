@@ -24,10 +24,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Load .env variables
+        run: cp .env.ci .env
+
       - name: Run migrations
-        run: |
-          python manage.py migrate
+        run: python manage.py migrate
 
       - name: Run tests
-        run: |
-          pytest --ds=NewsPortal.settings -v
+        run: pytest -v
