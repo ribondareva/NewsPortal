@@ -9,6 +9,23 @@ jobs:
     env:
       DJANGO_SETTINGS_MODULE: NewsPortal.settings
       PYTHONUNBUFFERED: 1
+      SITE_URL: ${{ secrets.SITE_URL }}
+      EMAIL_BACKEND: ${{ secrets.EMAIL_BACKEND }}
+      EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
+      EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
+      EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+      EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+      EMAIL_USE_TLS: ${{ secrets.EMAIL_USE_TLS }}
+      EMAIL_USE_SSL: ${{ secrets.EMAIL_USE_SSL }}
+      DEFAULT_FROM_EMAIL: ${{ secrets.DEFAULT_FROM_EMAIL }}
+      SERVER_EMAIL: ${{ secrets.SERVER_EMAIL }}
+      ADMINS: ${{ secrets.ADMINS }}
+      MANAGERS: ${{ secrets.MANAGERS }}
+      CELERY_BROKER_URL: ${{ secrets.CELERY_BROKER_URL }}
+      CELERY_RESULT_BACKEND: ${{ secrets.CELERY_RESULT_BACKEND }}
+      CELERY_ACCEPT_CONTENT: ${{ secrets.CELERY_ACCEPT_CONTENT }}
+      CELERY_TASK_SERIALIZER: ${{ secrets.CELERY_TASK_SERIALIZER }}
+      CELERY_RESULT_SERIALIZER: ${{ secrets.CELERY_RESULT_SERIALIZER }}
 
     steps:
       - name: Checkout code
