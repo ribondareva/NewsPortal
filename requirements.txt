@@ -56,3 +56,6 @@ pre-commit==4.2.0
 
 # Для работы с медиа полями в форме
 django-ckeditor-5
+
+# Для корректной работы pytest с Django
+pytest-django==4.8.0
