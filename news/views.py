@@ -4,8 +4,10 @@ import pytz  # Импортируем модуль для работы с час
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.core.cache import cache
+from django.db.models import BooleanField
 from django.db.models import Exists
 from django.db.models import OuterRef
+from django.db.models import Value
 from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
@@ -26,6 +28,7 @@ from .filters import PostFilter
 from .forms import CommentForm
 from .forms import PostForm
 from .models import Category
+from .models import Comment
 from .models import Post
 from .models import Subscription
 from .tasks import notify_about_new_post
@@ -86,24 +89,44 @@ class PostDetail(DetailView):
     context_object_name = "post"
     queryset = Post.objects.all()
 
-    def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта
-        obj = cache.get(f'product-{self.kwargs["pk"]}', None)
+    def get_object(self, *args, **kwargs):  # кешируем пост
+        obj = cache.get(f'post-{self.kwargs["pk"]}', None)
         if not obj:
             obj = super().get_object(queryset=self.queryset)
-            cache.set(f'product-{self.kwargs["pk"]}', obj)
+            cache.set(f'post-{self.kwargs["pk"]}', obj)
         return obj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Получаем комментарии, связанные с текущим постом
-        context["comments"] = self.object.comment_set.all()
-        # Часовой пояс из сессии
-        user_timezone = self.request.session.get("django_timezone", "UTC")
-        activate(user_timezone)
+        user = self.request.user
+        post = self.object
+        comments = post.comment_set.select_related("commentUser")
 
-        context["timezones"] = pytz.common_timezones
-        context["current_time"] = localtime(now())  # Локализованное время
-        context["TIME_ZONE"] = user_timezone  # для шаблона
+        # отметка, лайкнул ли текущий пользователь пост
+        context["user_liked_post"] = (
+            post.user_liked(user) if user.is_authenticated else False
+        )
+
+        # для каждого комментария добавляем атрибут `user_liked_current`
+        if user.is_authenticated:
+            for c in comments:
+                c.user_liked_current = c.user_liked(user)
+        else:
+            for c in comments:
+                c.user_liked_current = False
+
+        context["comments"] = comments
+
+        # данные часовых поясов
+        user_tz = self.request.session.get("django_timezone", "UTC")
+        activate(user_tz)
+        context.update(
+            {
+                "timezones": pytz.common_timezones,
+                "current_time": localtime(now()),
+                "TIME_ZONE": user_tz,
+            }
+        )
         return context
 
 
@@ -174,23 +197,33 @@ class CategoryListView(TimezoneMixin, ListView):
         self.category = get_object_or_404(Category, id=self.kwargs["pk"])
         queryset = Post.objects.filter(category=self.category).order_by("-creationDate")
         # Аннотируем категории, чтобы передать состояние подписки
-        return queryset.annotate(
-            user_subscribed=Exists(
+        if self.request.user.is_authenticated:
+            subscribed_expr = Exists(
                 Subscription.objects.filter(
-                    user=self.request.user,  # Текущий пользователь
-                    category=OuterRef("pk"),  # Сравнение по категории
+                    user_id=self.request.user.id,  # передаём id, а не объект
+                    category=OuterRef("pk"),
                 )
             )
-        )
+        else:
+            # для анонимов всегда False
+            subscribed_expr = Value(False, output_field=BooleanField())
+
+        return queryset.annotate(user_subscribed=subscribed_expr)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["is_not_subscriber"] = (
-            not self.get_queryset().filter(user_subscribed=True).exists()
-        )
-        context["category"] = self.category
-        context.update(self.get_timezones_context())
-        return context
+        ctx = super().get_context_data(**kwargs)
+
+        if self.request.user.is_authenticated:
+            ctx["is_not_subscriber"] = not Subscription.objects.filter(
+                user=self.request.user,
+                category=self.category,
+            ).exists()
+        else:
+            ctx["is_not_subscriber"] = True
+
+        ctx["category"] = self.category
+        ctx.update(self.get_timezones_context())
+        return ctx
 
 
 # Создание комментария
@@ -282,3 +315,31 @@ class HomePage(TemplateView, TimezoneMixin):
             request.session["django_timezone"] = timezone_name
             activate(timezone_name)
         return redirect(self.request.path)
+
+
+@login_required
+def like_post(request, pk):
+    post = get_object_or_404(Post, id=pk)
+    post.add_like(request.user)
+    return redirect(post.get_absolute_url())
+
+
+@login_required
+def unlike_post(request, pk):
+    post = get_object_or_404(Post, id=pk)
+    post.remove_like(request.user)
+    return redirect(post.get_absolute_url())
+
+
+@login_required
+def like_comment(request, pk):
+    comment = get_object_or_404(Comment, id=pk)
+    comment.add_like(request.user)
+    return redirect(comment.commentPost.get_absolute_url())
+
+
+@login_required
+def unlike_comment(request, pk):
+    comment = get_object_or_404(Comment, id=pk)
+    comment.remove_like(request.user)
+    return redirect(comment.commentPost.get_absolute_url())

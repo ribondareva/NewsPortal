@@ -1,32 +1,62 @@
-{% extends 'flatpages/default.html' %}
+{% extends "flatpages/default.html" %}
 {% load i18n %}
 {% load tz %}
 
 {% block title %}
-{{ post.title }}
+    {{ post.title }}
 {% endblock title %}
-
 
 {% block content %}
 <h1>{{ post.title }}</h1>
 <p>{{ post.text|safe }}</p>
+
 <hr>
 
-<h2>Комментарии:</h2>
-<ul>
+{% if user.is_authenticated %}
+    {% if user_liked_post %}
+        <a class="btn btn-sm btn-outline-danger"
+           href="{% url 'unlike_post' post.id %}">💔 Убрать лайк</a>
+    {% else %}
+        <a class="btn btn-sm btn-outline-success"
+           href="{% url 'like_post' post.id %}">❤️ Лайкнуть</a>
+    {% endif %}
+{% endif %}
+
+<p class="mt-2"><strong>Лайков:</strong> {{ post.get_likes_count }}</p>
+
+<h2 class="mt-4">Комментарии:</h2>
+<ul class="list-unstyled">
     {% for comment in comments %}
-        <li>
-            <strong>{{ comment.commentUser.username }}</strong>: {{ comment.text }}
-            <br>
-            <small>Добавлено: {{ comment.creationDate }}</small>
+        <li class="mb-3">
+            <strong>{{ comment.commentUser.username }}</strong>:
+            {{ comment.text }}<br>
+            <small class="text-muted">Добавлено: {{ comment.creationDate }}</small><br>
+
+            {% if user.is_authenticated %}
+                {% if comment.user_liked_current %}
+                    <a class="btn btn-sm btn-outline-danger"
+                       href="{% url 'unlike_comment' comment.id %}">💔 Убрать лайк</a>
+                {% else %}
+                    <a class="btn btn-sm btn-outline-success"
+                       href="{% url 'like_comment' comment.id %}">❤️ Лайкнуть</a>
+                {% endif %}
+            {% endif %}
+            <p class="d-inline-block mb-0 ms-2">
+                <strong>Лайков:</strong> {{ comment.get_likes_count }}
+            </p>
         </li>
     {% empty %}
         <p>Комментариев пока нет.</p>
     {% endfor %}
 </ul>
-<form action="{% url 'create_comment' post.pk %}" method="post">
+
+{% if user.is_authenticated %}
+<form class="mt-4" action="{% url 'create_comment' post.pk %}" method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Добавить комментарий</button>
+    <button class="btn btn-primary" type="submit">Добавить комментарий</button>
 </form>
+{% else %}
+<p><em>{% trans 'Только зарегистрированные пользователи могут оставлять комментарии.' %}</em></p>
+{% endif %}
 {% endblock content %}

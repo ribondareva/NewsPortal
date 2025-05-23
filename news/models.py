@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -9,7 +11,6 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django_ckeditor_5.fields import CKEditor5Field
-
 
 # from django.utils.translation import (
 #     pgettext_lazy,
@@ -43,7 +44,6 @@ class Category(models.Model):
 
 
 class Post(models.Model):
-
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     NEWS = "NW"
@@ -61,13 +61,13 @@ class Post(models.Model):
     text = CKEditor5Field("Text", config_name="default")
     rating = models.SmallIntegerField(default=0)
 
-    def like(self):
-        self.rating += 1
-        self.save()
-
-    def dislike(self):
-        self.rating -= 1
-        self.save()
+    # def like(self):
+    #     self.rating += 1
+    #     self.save()
+    #
+    # def dislike(self):
+    #     self.rating -= 1
+    #     self.save()
 
     def preview(self):
         return self.text[0:119] + "..."
@@ -79,9 +79,35 @@ class Post(models.Model):
         super().save(
             *args, **kwargs
         )  # сначала вызываем метод родителя, чтобы объект сохранился
-        cache.delete(
-            f"product-{self.pk}"
-        )  # затем удаляем его из кэша, чтобы сбросить его
+        cache.delete(f"post-{self.pk}")  # затем удаляем его из кэша, чтобы сбросить его
+
+    def add_like(self, user):
+        if not self.user_liked(user):
+            Like.objects.create(user=user, content_object=self)
+            self.rating += 1
+            self.save()
+            self.author.update_rating()
+
+    def remove_like(self, user):
+        content_type = ContentType.objects.get_for_model(self)
+        like = Like.objects.filter(
+            user=user, content_type=content_type, object_id=self.id
+        )
+        if like.exists():
+            like.delete()
+            self.rating = max(0, self.rating - 1)
+            self.save()
+            self.author.update_rating()
+
+    def user_liked(self, user):
+        content_type = ContentType.objects.get_for_model(self)
+        return Like.objects.filter(
+            user=user, content_type=content_type, object_id=self.id
+        ).exists()
+
+    def get_likes_count(self):
+        content_type = ContentType.objects.get_for_model(self)
+        return Like.objects.filter(content_type=content_type, object_id=self.id).count()
 
     class Meta:
         permissions = [
@@ -100,23 +126,67 @@ class Comment(models.Model):
     text = models.TextField()
     creationDate = models.DateTimeField(auto_now_add=True)
     rating = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)])
-
-    def like(self):
-        self.rating += 1
-        self.save()
-
-    def dislike(self):
-        self.rating -= 1
-        self.save()
+    # def like(self):
+    #     self.rating += 1
+    #     self.save()
+    #
+    # def dislike(self):
+    #     self.rating -= 1
+    #     self.save()
 
     def __str__(self):
         return f"Комментарий от {self.commentUser} к {self.commentPost}"
+
+    def add_like(self, user):
+        if not self.user_liked(user):
+            Like.objects.create(user=user, content_object=self)
+            self.rating += 1
+            self.save()
+            if hasattr(self.commentUser, "author"):
+                self.commentUser.author.update_rating()
+
+    def remove_like(self, user):
+        content_type = ContentType.objects.get_for_model(self)
+        like = Like.objects.filter(
+            user=user, content_type=content_type, object_id=self.id
+        )
+        if like.exists():
+            like.delete()
+            self.rating = max(0, self.rating - 1)
+            self.save()
+            if hasattr(self.commentUser, "author"):
+                self.commentUser.author.update_rating()
+
+    def user_liked(self, user):
+        content_type = ContentType.objects.get_for_model(self)
+        return Like.objects.filter(
+            user=user, content_type=content_type, object_id=self.id
+        ).exists()
+
+    def get_likes_count(self):
+        content_type = ContentType.objects.get_for_model(self)
+        return Like.objects.filter(content_type=content_type, object_id=self.id).count()
 
     class Meta:
         permissions = [
             ("can_add_comment", "Can add comment"),
             ("can_delete_comment", "Can delete comment"),
         ]
+
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "content_type", "object_id")
+        indexes = [models.Index(fields=["content_type", "object_id"])]
+
+    def __str__(self):
+        return f"{self.user} → {self.content_object}"
 
 
 class New(models.Model):

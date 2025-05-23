@@ -4,6 +4,7 @@ from modeltranslation.admin import TranslationAdmin  # импортируем м
 from .models import Author
 from .models import Category
 from .models import Comment
+from .models import Like
 from .models import New
 from .models import Post
 from .models import PostCategory
@@ -26,3 +27,4 @@ admin.site.register(Author)
 admin.site.register(Post)
 admin.site.register(PostCategory)
 admin.site.register(Category)
+admin.site.register(Like)

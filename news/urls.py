@@ -2,6 +2,8 @@ from django.urls import path
 
 from .views import CategoryListView
 from .views import CreateCommentView
+from .views import like_comment
+from .views import like_post
 from .views import PostCreate
 from .views import PostDelete
 from .views import PostDetail
@@ -9,6 +11,8 @@ from .views import PostEdit
 from .views import PostsList
 from .views import subscribe
 from .views import subscriptions
+from .views import unlike_comment
+from .views import unlike_post
 
 
 urlpatterns = [
@@ -25,4 +29,8 @@ urlpatterns = [
     path("categories/<int:pk>", CategoryListView.as_view(), name="category_list"),
     path("categories/<int:pk>/subscribe", subscribe, name="subscribe"),
     path("subscriptions/", subscriptions, name="subscriptions"),
+    path("<int:pk>/like/", like_post, name="like_post"),
+    path("<int:pk>/unlike/", unlike_post, name="unlike_post"),
+    path("comment/<int:pk>/like/", like_comment, name="like_comment"),
+    path("comment/<int:pk>/unlike/", unlike_comment, name="unlike_comment"),
 ]
