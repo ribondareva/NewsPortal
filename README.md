@@ -146,3 +146,7 @@ http://localhost:8000/accounts/signup/
 ```
 http://127.0.0.1:8000/post/search/
 ```
+- Подписаться или отписаться от категории
+```
+http://127.0.0.1:8000/post/subscriptions/
+```
