@@ -1,25 +1,36 @@
 {% extends 'flatpages/default.html' %}
 
+{% load i18n %}
+{% load tz %}
+
+{% load custom_filters %}
+
 {% block title %}
+{% load static %}
 Subscriptions
 {% endblock title %}
 
 {% block content %}
-    {% for category in categories  %}
-        <p>
-            {{ category.name }}
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="category_id" value="{{ category.id }}" />
+<link rel="stylesheet" href="{% static 'css/styles.css' %}"/>
+ <style>
+     body {background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} #20B2AA {% else %} powderblue {% endif %};}
+ </style>
+<a class="btn btn-secondary my-3" href="{% url 'post_list' %}">↩︎ Назад к постам</a>
+{% for category in categories  %}
+    <p>
+        {{ category.name }}
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="category_id" value="{{ category.id }}" />
 
-                {% if category.user_subscribed %}
-                    <button disabled>Подписаться</button>
-                    <button name="action" value="unsubscribe">Отписаться</button>
-                {% else %}
-                    <button name="action" value="subscribe">Подписаться</button>
-                    <button disabled>Отписаться</button>
-                {% endif %}
-            </form>
-        </p>
-    {% endfor %}
+            {% if category.user_subscribed %}
+                <button disabled>Подписаться</button>
+                <button name="action" value="unsubscribe">Отписаться</button>
+            {% else %}
+                <button name="action" value="subscribe">Подписаться</button>
+                <button disabled>Отписаться</button>
+            {% endif %}
+        </form>
+    </p>
+{% endfor %}
 {% endblock content %}

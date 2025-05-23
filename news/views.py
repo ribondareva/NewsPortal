@@ -56,12 +56,12 @@ class PostsList(ListView, TimezoneMixin):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        self.filterset = PostFilter(self.request.GET, queryset)
         if self.request.path.startswith("/news/"):
             queryset = self.filterset.qs.filter(categoryType="NW")
         elif self.request.path.startswith("/articles/"):
             queryset = self.filterset.qs.filter(categoryType="AR")
-        return queryset
+        self.filterset = PostFilter(self.request.GET, queryset=queryset)
+        return self.filterset.qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -205,7 +205,7 @@ class CategoryListView(TimezoneMixin, ListView):
         if self.request.user.is_authenticated:
             subscribed_expr = Exists(
                 Subscription.objects.filter(
-                    user_id=self.request.user.id,  # передаём id, а не объект
+                    user_id=self.request.user.id,
                     category=OuterRef("pk"),
                 )
             )
@@ -272,13 +272,22 @@ def subscribe(request, pk):
 
 
 def subscriptions(request):
-    if request.method == "POST":
+    # Сохраняем временную зону в сессию, если была отправлена
+    timezone_name = request.POST.get("timezone")
+    if timezone_name in pytz.common_timezones:
+        request.session["django_timezone"] = timezone_name
+        activate(timezone_name)
+    else:
+        timezone_name = request.session.get("django_timezone", "UTC")
+        activate(timezone_name)
+
+    if request.method == "POST" and "category_id" in request.POST:
         category_id = request.POST.get("category_id")
         category = Category.objects.get(id=category_id)
         action = request.POST.get("action")
 
         if action == "subscribe":
-            Subscription.objects.create(user=request.user, category=category)
+            Subscription.objects.get_or_create(user=request.user, category=category)
         elif action == "unsubscribe":
             Subscription.objects.filter(
                 user=request.user,
@@ -293,10 +302,16 @@ def subscriptions(request):
             )
         )
     ).order_by("name")
+
     return render(
         request,
         "subscriptions.html",
-        {"categories": categories_with_subscriptions},
+        {
+            "categories": categories_with_subscriptions,
+            "TIME_ZONE": timezone_name,
+            "current_time": localtime(now()),
+            "timezones": pytz.common_timezones,
+        },
     )
 
 

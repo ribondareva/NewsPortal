@@ -1,33 +1,40 @@
 {% extends 'flatpages/default.html' %}
-
+{% load i18n %}
+{% load tz %}
 {% block content %}
-  <h1>Результаты поиска</h1>
+<div class="container">
 
-   <form action="" method="get">
-    {{ filterset.form.as_p }}
-    <input type="submit" value="Найти" />
+  <a class="btn btn-secondary my-3" href="{% url 'post_list' %}">↩︎ Назад к постам</a>
+
+  <h1 class="mb-4">Результаты поиска</h1>
+
+  <form class="mb-4" method="get">
+      {{ filterset.form.as_p }}
+      <button class="btn btn-primary" type="submit">Найти</button>
   </form>
 
+  {% if posts %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Заголовок</th>
+          <th>Дата публикации</th>
+          <th>Текст</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for post in posts %}
+          <tr>
+            <td>{{ post.title }}</td>
+            <td>{{ post.creationDate|date:'d.m.Y' }}</td>
+            <td>{{ post.text|safe }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="lead">Таких постов нет!</p>
+  {% endif %}
 
-
- {% if posts %}
-       <table>
-           <tr>
-               <td>Заголовок</td>
-               <td>Дата публикации</td>
-               <td>Текст</td>
-           </tr>
-
-           {% for post in posts %}
-           <tr>
-               <td>{{ post.title}}</td>
-               <td>{{ post.creationDate|date:'d.m.Y' }}</td>
-               <td>{{ post.text|safe }}</td>
-           </tr>
-           {% endfor %}
-
-       </table>
-   {% else %}
-       <h2>Новостей нет!</h2>
-   {% endif %}
+</div>
 {% endblock %}

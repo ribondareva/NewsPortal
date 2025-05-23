@@ -1,56 +1,56 @@
 {% extends 'flatpages/default.html' %}
-
+{% load i18n %}
+{% load tz %}
 {% load custom_filters %}
 {% load cache %}
 
-{% cache 100 number %}
 {% block title %}
 News
 {% endblock title %}
-{% endcache %}
 
 {% block content %}
-   {% cache 100 number1 %}
-   <style>
+
+<style>
     /* Выравниваем весь контент по левому краю */
     body {
         text-align: left;
     }
-   </style>
+</style>
 
-   <h3>Всего постов в категории {{ category.name }}: {{ category_news_list|length }}</h3>
-   {% endcache %}
+{% cache 100 category_header category.id %}
+<h3>Всего постов в категории {{ category.name }}: {{ category_news_list|length }}</h3>
+{% endcache %}
 
-    {% if is_not_subscriber %}
-         <form method="post" action="{% url 'subscribe' category.id %}">
-             {% csrf_token %}
-             <button type="submit">Подписаться</button>
-        </form>
-    {% else %}
-        <form method="post" action="{% url 'subscribe' category.id %}">
-            {% csrf_token %}
-            <button type="submit">Отписаться</button>
-        </form>
-    {% endif %}
+{% if is_not_subscriber %}
+    <form method="post" action="{% url 'subscribe' category.id %}">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit">Подписаться</button>
+    </form>
+{% else %}
+    <form method="post" action="{% url 'subscribe' category.id %}">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit">Отписаться</button>
+    </form>
+{% endif %}
+<a class="btn btn-secondary my-3" href="{% url 'post_list' %}">↩︎ Назад к постам</a>
+<hr>
 
-   <hr>
-
-   <ul class="list-group list-group-flush">
-       {% for post in category_news_list %}
-           <li class="list-group-item">
-                <small class="fw-bold">{{ post.creationDate|date:'d.m.Y'}}</small>
-                <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-                <small class="text-muted">(автор: {{ post.author }})</small><br>
-                <small class="fw-bold">Категории:
-                    {% for category in post.category.all %}
-                        <a href="{% url 'category_list' category.id %}">{{ category }}</a>
-                    {% endfor %}
-                </small>
-                <p>{{ post.text|truncatechars:210|safe}}</p>
-           </li>
-       {% endfor %}
-   </ul>
-
-
+{% cache 100 category_list category.id %}
+<ul class="list-group list-group-flush">
+    {% for post in category_news_list %}
+        <li class="list-group-item">
+            <small class="fw-bold">{{ post.creationDate|date:'d.m.Y' }}</small>
+            <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+            <small class="text-muted">(автор: {{ post.author }})</small><br>
+            <small class="fw-bold">Категории:
+                {% for category in post.category.all %}
+                    <a href="{% url 'category_list' category.id %}">{{ category }}</a>
+                {% endfor %}
+            </small>
+            <p>{{ post.text|truncatechars:210|safe }}</p>
+        </li>
+    {% endfor %}
+</ul>
+{% endcache %}
 
 {% endblock content %}

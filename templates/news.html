@@ -32,6 +32,7 @@
 
 {% if perms.news.create_post %}
     <a href="{% url 'create_post' %}" class="btn btn-primary mb-3">{% trans "Add post" %}</a>
+    <a href="{% url 'post_filter' %}" class="btn btn-secondary mb-3">Поиск</a>
 {% endif %}
 
 {% if posts %}
@@ -76,23 +77,34 @@
     <h2>{% trans "No posts yet!" %}</h2>
 {% endif %}
 
-<div class="pagination">
-    {% if page_obj.has_previous %}
-        <a href="?page=1">1</a>
-        {% if page_obj.previous_page_number != 1 %}
-            ...
-            <a href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+<!-- Bootstrap pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center fs-5 mt-4">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">1</a>
+            </li>
+            {% if page_obj.previous_page_number != 1 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+                </li>
+            {% endif %}
         {% endif %}
-    {% endif %}
 
-    <span class="current">{{ page_obj.number }}</span>
+        <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
 
-    {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-        {% if paginator.num_pages != page_obj.next_page_number %}
-            ...
-            <a href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+            </li>
+            {% if paginator.num_pages != page_obj.next_page_number %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+                </li>
+            {% endif %}
         {% endif %}
-    {% endif %}
-</div>
+    </ul>
+</nav>
 {% endblock content %}
