@@ -20,9 +20,19 @@
         <a class="btn btn-sm btn-outline-success"
            href="{% url 'like_post' post.id %}">❤️ Лайкнуть</a>
     {% endif %}
+    {% if user_disliked_post %}
+        <a class="btn btn-sm btn-outline-secondary ms-2"
+           href="{% url 'undislike_post' post.id %}">🚫 Убрать дизлайк</a>
+    {% else %}
+        <a class="btn btn-sm btn-outline-dark ms-2"
+           href="{% url 'dislike_post' post.id %}">👎 Дизлайкнуть</a>
+    {% endif %}
 {% endif %}
 
-<p class="mt-2"><strong>Лайков:</strong> {{ post.get_likes_count }}</p>
+<p class="mt-2">
+    <strong>Лайков:</strong> {{ post.get_likes_count }}
+    <strong>Дизлайков:</strong> {{ post.get_dislikes_count }}
+</p>
 
 <h2 class="mt-4">Комментарии:</h2>
 <ul class="list-unstyled">
@@ -33,16 +43,27 @@
             <small class="text-muted">Добавлено: {{ comment.creationDate }}</small><br>
 
             {% if user.is_authenticated %}
+                {# --- лайк комментария --- #}
                 {% if comment.user_liked_current %}
                     <a class="btn btn-sm btn-outline-danger"
-                       href="{% url 'unlike_comment' comment.id %}">💔 Убрать лайк</a>
+                     href="{% url 'unlike_comment' comment.id %}">💔 Убрать лайк</a>
                 {% else %}
-                    <a class="btn btn-sm btn-outline-success"
-                       href="{% url 'like_comment' comment.id %}">❤️ Лайкнуть</a>
+                     <a class="btn btn-sm btn-outline-success"
+                     href="{% url 'like_comment' comment.id %}">❤️ Лайкнуть</a>
                 {% endif %}
+
+                {# --- дизлайк комментария --- #}
+                {% if comment.user_disliked_current %}
+                  <a class="btn btn-sm btn-outline-secondary ms-2"
+                     href="{% url 'undislike_comment' comment.id %}">🚫 Убрать дизлайк</a>
+                {% else %}
+                  <a class="btn btn-sm btn-outline-dark ms-2"
+                     href="{% url 'dislike_comment' comment.id %}">👎 Дизлайкнуть</a>
+                 {% endif %}
             {% endif %}
-            <p class="d-inline-block mb-0 ms-2">
-                <strong>Лайков:</strong> {{ comment.get_likes_count }}
+            <p class="mt-2">
+                <strong>Лайков:</strong> {{ comment.get_likes_count }} |
+                <strong>Дизлайков:</strong> {{ comment.get_dislikes_count }}
             </p>
         </li>
     {% empty %}

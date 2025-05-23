@@ -106,14 +106,19 @@ class PostDetail(DetailView):
         context["user_liked_post"] = (
             post.user_liked(user) if user.is_authenticated else False
         )
+        context["user_disliked_post"] = (
+            post.user_disliked(user) if user.is_authenticated else False
+        )
 
         # для каждого комментария добавляем атрибут `user_liked_current`
         if user.is_authenticated:
             for c in comments:
                 c.user_liked_current = c.user_liked(user)
+                c.user_disliked_current = c.user_disliked(user)
         else:
             for c in comments:
                 c.user_liked_current = False
+                c.user_disliked_current = False
 
         context["comments"] = comments
 
@@ -342,4 +347,42 @@ def like_comment(request, pk):
 def unlike_comment(request, pk):
     comment = get_object_or_404(Comment, id=pk)
     comment.remove_like(request.user)
+    return redirect(comment.commentPost.get_absolute_url())
+
+
+@login_required
+def dislike_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+
+    if post.user_disliked(request.user):
+        post.remove_dislike(request.user)
+    else:
+        post.remove_like(request.user)  # чтобы нельзя было и лайк и дизлайк
+        post.add_dislike(request.user)
+
+    return redirect("post_detail", pk=pk)
+
+
+@login_required
+def undislike_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.remove_dislike(request.user)
+    return redirect("post_detail", pk=pk)
+
+
+@login_required
+def dislike_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    if comment.user_disliked(request.user):
+        comment.remove_dislike(request.user)
+    else:
+        comment.remove_like(request.user)
+        comment.add_dislike(request.user)
+    return redirect(comment.commentPost.get_absolute_url())
+
+
+@login_required
+def undislike_comment(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    comment.remove_dislike(request.user)
     return redirect(comment.commentPost.get_absolute_url())

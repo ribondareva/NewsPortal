@@ -61,14 +61,6 @@ class Post(models.Model):
     text = CKEditor5Field("Text", config_name="default")
     rating = models.SmallIntegerField(default=0)
 
-    # def like(self):
-    #     self.rating += 1
-    #     self.save()
-    #
-    # def dislike(self):
-    #     self.rating -= 1
-    #     self.save()
-
     def preview(self):
         return self.text[0:119] + "..."
 
@@ -82,6 +74,8 @@ class Post(models.Model):
         cache.delete(f"post-{self.pk}")  # затем удаляем его из кэша, чтобы сбросить его
 
     def add_like(self, user):
+        if self.user_disliked(user):
+            self.remove_dislike(user)
         if not self.user_liked(user):
             Like.objects.create(user=user, content_object=self)
             self.rating += 1
@@ -108,6 +102,40 @@ class Post(models.Model):
     def get_likes_count(self):
         content_type = ContentType.objects.get_for_model(self)
         return Like.objects.filter(content_type=content_type, object_id=self.id).count()
+
+    def add_dislike(self, user):
+        if self.user_liked(user):
+            self.remove_like(user)
+        if not self.user_disliked(user):
+            Dislike.objects.create(user=user, content_object=self)
+            self.rating = max(0, self.rating - 1)
+            self.save()
+            if hasattr(self, "author"):
+                self.author.update_rating()
+
+    def remove_dislike(self, user):
+        content_type = ContentType.objects.get_for_model(self)
+        dislike = Dislike.objects.filter(
+            user=user, content_type=content_type, object_id=self.id
+        )
+        if dislike.exists():
+            dislike.delete()
+            self.rating += 1
+            self.save()
+            if hasattr(self, "author"):
+                self.author.update_rating()
+
+    def user_disliked(self, user):
+        content_type = ContentType.objects.get_for_model(self)
+        return Dislike.objects.filter(
+            user=user, content_type=content_type, object_id=self.id
+        ).exists()
+
+    def get_dislikes_count(self):
+        content_type = ContentType.objects.get_for_model(self)
+        return Dislike.objects.filter(
+            content_type=content_type, object_id=self.id
+        ).count()
 
     class Meta:
         permissions = [
@@ -126,18 +154,13 @@ class Comment(models.Model):
     text = models.TextField()
     creationDate = models.DateTimeField(auto_now_add=True)
     rating = models.SmallIntegerField(default=0, validators=[MinValueValidator(0)])
-    # def like(self):
-    #     self.rating += 1
-    #     self.save()
-    #
-    # def dislike(self):
-    #     self.rating -= 1
-    #     self.save()
 
     def __str__(self):
         return f"Комментарий от {self.commentUser} к {self.commentPost}"
 
     def add_like(self, user):
+        if self.user_disliked(user):
+            self.remove_dislike(user)
         if not self.user_liked(user):
             Like.objects.create(user=user, content_object=self)
             self.rating += 1
@@ -146,26 +169,56 @@ class Comment(models.Model):
                 self.commentUser.author.update_rating()
 
     def remove_like(self, user):
-        content_type = ContentType.objects.get_for_model(self)
-        like = Like.objects.filter(
-            user=user, content_type=content_type, object_id=self.id
-        )
-        if like.exists():
-            like.delete()
+        ct = ContentType.objects.get_for_model(self)
+        qs = Like.objects.filter(user=user, content_type=ct, object_id=self.id)
+        if qs.exists():
+            qs.delete()
             self.rating = max(0, self.rating - 1)
             self.save()
             if hasattr(self.commentUser, "author"):
                 self.commentUser.author.update_rating()
 
     def user_liked(self, user):
-        content_type = ContentType.objects.get_for_model(self)
+        ct = ContentType.objects.get_for_model(self)
         return Like.objects.filter(
-            user=user, content_type=content_type, object_id=self.id
+            user=user, content_type=ct, object_id=self.id
         ).exists()
 
     def get_likes_count(self):
-        content_type = ContentType.objects.get_for_model(self)
-        return Like.objects.filter(content_type=content_type, object_id=self.id).count()
+        ct = ContentType.objects.get_for_model(self)
+        return Like.objects.filter(content_type=ct, object_id=self.id).count()
+
+        # ── дизлайки ───────────────────────────────
+
+    def add_dislike(self, user):
+        if self.user_liked(user):
+            self.remove_like(user)
+        if not self.user_disliked(user):
+            Dislike.objects.create(user=user, content_object=self)
+            self.rating = max(0, self.rating - 1)
+            self.save()
+            if hasattr(self.commentUser, "author"):
+                self.commentUser.author.update_rating()
+
+    def remove_dislike(self, user):
+        ct = ContentType.objects.get_for_model(self)
+        qs = Dislike.objects.filter(user=user, content_type=ct, object_id=self.id)
+        if qs.exists():
+            qs.delete()
+            self.rating += 1
+            self.save()
+            if hasattr(self.commentUser, "author"):
+                self.commentUser.author.update_rating()
+
+    def user_disliked(self, user):
+        ct = ContentType.objects.get_for_model(self)
+        return Dislike.objects.filter(
+            user=user, content_type=ct, object_id=self.id
+        ).exists()
+
+    def get_dislikes_count(self):
+        ct = ContentType.objects.get_for_model(self)
+        return Dislike.objects.filter(content_type=ct, object_id=self.id).count()
 
     class Meta:
         permissions = [
@@ -187,6 +240,21 @@ class Like(models.Model):
 
     def __str__(self):
         return f"{self.user} → {self.content_object}"
+
+
+class Dislike(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey("content_type", "object_id")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "content_type", "object_id")
+        indexes = [models.Index(fields=["content_type", "object_id"])]
+
+    def __str__(self):
+        return f"{self.user} 👎 {self.content_object}"
 
 
 class New(models.Model):
