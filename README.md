@@ -53,7 +53,7 @@
 ## Инструкция по установке
 
 ### 1. Клонирование репозитория
-```
+```bash
 git clone https://github.com/ribondareva/NewsPortal.git
 cd newsportal
 ```
@@ -63,9 +63,12 @@ cd newsportal
 Создайте файл .env в корневой директории проекта со следующим содержимым:
 ```
 # Основные настройки
+```python
 SITE_URL=http://127.0.0.1:8000
+```
 
 # Настройки почты
+```python
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.yandex.ru
 EMAIL_PORT=465
@@ -75,30 +78,33 @@ EMAIL_USE_TLS=False
 EMAIL_USE_SSL=True
 DEFAULT_FROM_EMAIL=<ваш_email>
 SERVER_EMAIL=<ваш_email>
-
+```
 # Администраторы
+```python
 ADMINS=[("Администратор", "<ваш_email>")]
 MANAGERS=[("Менеджер", "<ваш_email>")]
-
+```
 # Celery настройки
+```python
 CELERY_BROKER_URL=redis://localhost:6379
 CELERY_RESULT_BACKEND=redis://localhost:6379
 CELERY_ACCEPT_CONTENT=application/json
 CELERY_TASK_SERIALIZER=json
 CELERY_RESULT_SERIALIZER=json
-
+```
 # Настройки для OAuth2 Яндекс
+```python
 YANDEX_OAUTH_CLIENT_ID=<ваш_client_id>
 YANDEX_OAUTH_CLIENT_SECRET=<ваш_client_secret>
 YANDEX_OAUTH_REDIRECT_URI=http://127.0.0.1:8000/accounts/yandex/callback/
 ```
 ### 3. Применение миграций
-```
+```bash
 python manage.py migrate
 ```
 ### 4. Установите Docker и Docker Compose
 ### 5. Соберите и запустите контейнеры:
-```
+```bash
 docker-compose up --build
 ```
 ### 6. Доступ к приложению
